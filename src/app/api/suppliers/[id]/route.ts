@@ -1,5 +1,5 @@
 import { auth } from '@/lib/auth';
-import {  } from '@/server/services/master-data';
+import { supplierService } from '@/server/services/master-data';
 import { success, error, notFound } from '@/lib/api-response';
 import { NextRequest } from 'next/server';
 
