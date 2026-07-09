@@ -1,0 +1,158 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e3]:
+    - complementary [ref=f5e4]:
+      - generic [ref=f5e5]:
+        - generic [ref=f5e6]: 发票中台
+        - button [ref=f5e7]:
+          - img
+      - navigation [ref=f5e8]:
+        - generic [ref=f5e9]:
+          - paragraph [ref=f5e10]: 概览
+          - link "工作台" [ref=f5e12] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=f5e13]
+            - generic [ref=f5e18]: 工作台
+        - generic [ref=f5e19]:
+          - paragraph [ref=f5e20]: 业务管理
+          - generic [ref=f5e21]:
+            - link "业务订单" [ref=f5e22] [cursor=pointer]:
+              - /url: /business-orders
+              - img [ref=f5e23]
+              - generic [ref=f5e28]: 业务订单
+            - link "费用管理" [ref=f5e29] [cursor=pointer]:
+              - /url: /fee-items
+              - img [ref=f5e30]
+              - generic [ref=f5e35]: 费用管理
+            - link "收入订单" [ref=f5e36] [cursor=pointer]:
+              - /url: /revenue-orders
+              - img [ref=f5e37]
+              - generic [ref=f5e39]: 收入订单
+            - link "客户结算" [ref=f5e40] [cursor=pointer]:
+              - /url: /customer-settlements
+              - img [ref=f5e41]
+              - generic [ref=f5e43]: 客户结算
+        - generic [ref=f5e44]:
+          - paragraph [ref=f5e45]: 销项发票
+          - generic [ref=f5e46]:
+            - link "开票申请" [ref=f5e47] [cursor=pointer]:
+              - /url: /applications
+              - img [ref=f5e48]
+              - generic [ref=f5e51]: 开票申请
+            - link "销项发票" [ref=f5e52] [cursor=pointer]:
+              - /url: /invoices
+              - img [ref=f5e53]
+              - generic [ref=f5e57]: 销项发票
+        - generic [ref=f5e58]:
+          - paragraph [ref=f5e59]: 基础资料
+          - generic [ref=f5e60]:
+            - link "客户管理" [ref=f5e61] [cursor=pointer]:
+              - /url: /customers
+              - img [ref=f5e62]
+              - generic [ref=f5e67]: 客户管理
+            - link "供应商管理" [ref=f5e68] [cursor=pointer]:
+              - /url: /suppliers
+              - img [ref=f5e69]
+              - generic [ref=f5e73]: 供应商管理
+            - link "公司主体" [ref=f5e74] [cursor=pointer]:
+              - /url: /organizations
+              - img [ref=f5e75]
+              - generic [ref=f5e79]: 公司主体
+            - link "税号管理" [ref=f5e80] [cursor=pointer]:
+              - /url: /tax-subjects
+              - img [ref=f5e81]
+              - generic [ref=f5e84]: 税号管理
+            - link "服务项目" [ref=f5e85] [cursor=pointer]:
+              - /url: /invoice-items
+              - img [ref=f5e86]
+              - generic [ref=f5e90]: 服务项目
+            - link "税收分类编码" [ref=f5e91] [cursor=pointer]:
+              - /url: /tax-codes
+              - img [ref=f5e92]
+              - generic [ref=f5e95]: 税收分类编码
+    - generic [ref=f5e96]:
+      - banner [ref=f5e97]:
+        - generic [ref=f5e98]:
+          - button [ref=f5e99]:
+            - img
+          - button
+          - button "U" [ref=f5e100]:
+            - generic [ref=f5e102]: U
+            - generic:
+              - paragraph
+              - paragraph
+      - main [ref=f5e103]:
+        - generic [ref=f5e104]:
+          - generic [ref=f5e105]:
+            - heading "工作台" [level=1] [ref=f5e106]
+            - paragraph [ref=f5e107]: 欢迎回来，
+          - generic [ref=f5e108]:
+            - generic [ref=f5e111]:
+              - generic [ref=f5e112]:
+                - paragraph [ref=f5e113]: 待开票
+                - paragraph [ref=f5e114]: "0"
+              - img [ref=f5e116]
+            - generic [ref=f5e121]:
+              - generic [ref=f5e122]:
+                - paragraph [ref=f5e123]: 代垫待收
+                - paragraph [ref=f5e124]: "0"
+              - img [ref=f5e126]
+            - generic [ref=f5e130]:
+              - generic [ref=f5e131]:
+                - paragraph [ref=f5e132]: 待红冲
+                - paragraph [ref=f5e133]: "0"
+              - img [ref=f5e135]
+            - generic [ref=f5e139]:
+              - generic [ref=f5e140]:
+                - paragraph [ref=f5e141]: 待查验
+                - paragraph [ref=f5e142]: "0"
+              - img [ref=f5e144]
+            - generic [ref=f5e150]:
+              - generic [ref=f5e151]:
+                - paragraph [ref=f5e152]: 待归档
+                - paragraph [ref=f5e153]: "0"
+              - img [ref=f5e155]
+            - generic [ref=f5e160]:
+              - generic [ref=f5e161]:
+                - paragraph [ref=f5e162]: 高风险事项
+                - paragraph [ref=f5e163]: "0"
+              - img [ref=f5e165]
+          - generic [ref=f5e167]:
+            - generic [ref=f5e169]:
+              - heading "待办事项" [level=3] [ref=f5e170]
+              - link "待审批开票申请 0" [ref=f5e171] [cursor=pointer]:
+                - /url: /applications
+                - generic [ref=f5e172]: 待审批开票申请
+                - generic [ref=f5e173]: "0"
+              - link "待确认代垫单 0" [ref=f5e174] [cursor=pointer]:
+                - /url: /advance-payments
+                - generic [ref=f5e175]: 待确认代垫单
+                - generic [ref=f5e176]: "0"
+              - link "待处理高风险 0" [ref=f5e177] [cursor=pointer]:
+                - /url: /risk
+                - generic [ref=f5e178]: 待处理高风险
+                - generic [ref=f5e179]: "0"
+              - link "待归档发票 0" [ref=f5e180] [cursor=pointer]:
+                - /url: /archive
+                - generic [ref=f5e181]: 待归档发票
+                - generic [ref=f5e182]: "0"
+            - generic [ref=f5e184]:
+              - heading "快捷入口" [level=3] [ref=f5e185]
+              - link "新建开票申请" [ref=f5e186] [cursor=pointer]:
+                - /url: /applications/new
+                - generic [ref=f5e187]: 新建开票申请
+                - img [ref=f5e188]
+              - link "新建代垫单" [ref=f5e190] [cursor=pointer]:
+                - /url: /advance-payments/new
+                - generic [ref=f5e191]: 新建代垫单
+                - img [ref=f5e192]
+              - link "录入进项发票" [ref=f5e194] [cursor=pointer]:
+                - /url: /input-invoices/collection
+                - generic [ref=f5e195]: 录入进项发票
+                - img [ref=f5e196]
+              - link "录入海关缴款书" [ref=f5e198] [cursor=pointer]:
+                - /url: /customs-payment-books/new
+                - generic [ref=f5e199]: 录入海关缴款书
+                - img [ref=f5e200]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f5e207] [cursor=pointer]:
+    - img [ref=f5e208]

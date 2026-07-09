@@ -1,0 +1,7 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e4]:
+    - heading "404" [level=1] [ref=f3e5]
+    - heading "This page could not be found." [level=2] [ref=f3e7]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f3e13] [cursor=pointer]:
+    - img [ref=f3e14]
