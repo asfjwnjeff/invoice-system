@@ -5,10 +5,16 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, Building2, Receipt, Tags, FileText, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Receipt, Tags, FileText, ChevronLeft, FileClock, Coins, Landmark, Calculator, FileSpreadsheet, Files } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "工作台", icon: LayoutDashboard, section: "概览" },
+  { href: "/business-orders", label: "业务订单", icon: FileClock, section: "业务管理" },
+  { href: "/fee-items", label: "费用管理", icon: Coins, section: "业务管理" },
+  { href: "/revenue-orders", label: "收入订单", icon: Landmark, section: "业务管理" },
+  { href: "/customer-settlements", label: "客户结算", icon: Calculator, section: "业务管理" },
+  { href: "/applications", label: "开票申请", icon: FileSpreadsheet, section: "销项发票" },
+  { href: "/invoices", label: "销项发票", icon: Files, section: "销项发票" },
   { href: "/customers", label: "客户管理", icon: Users, section: "基础资料" },
   { href: "/suppliers", label: "供应商管理", icon: Building2, section: "基础资料" },
   { href: "/organizations", label: "公司主体", icon: Building2, section: "基础资料" },
