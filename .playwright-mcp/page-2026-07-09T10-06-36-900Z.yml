@@ -1,0 +1,36 @@
+- generic [active] [ref=f13e1]:
+  - generic [ref=f13e3]:
+    - generic [ref=f13e4]:
+      - generic [ref=f13e5]:
+        - heading "业务订单" [level=1] [ref=f13e6]
+        - paragraph [ref=f13e7]: 管理供应链综合服务订单（代垫/收入/成本的锚点）
+      - button "新增订单" [ref=f13e8]:
+        - img
+        - text: 新增订单
+    - generic [ref=f13e9]:
+      - generic [ref=f13e10]:
+        - img [ref=f13e11]
+        - textbox "搜索订单号..." [ref=f13e14]
+      - table [ref=f13e17]:
+        - rowgroup [ref=f13e18]:
+          - row "订单号 标题 类型 客户 状态 操作" [ref=f13e19]:
+            - columnheader "订单号" [ref=f13e20]
+            - columnheader "标题" [ref=f13e21]
+            - columnheader "类型" [ref=f13e22]
+            - columnheader "客户" [ref=f13e23]
+            - columnheader "状态" [ref=f13e24]
+            - columnheader "操作" [ref=f13e25]
+        - rowgroup [ref=f13e26]:
+          - row "暂无数据" [ref=f13e27]:
+            - cell "暂无数据" [ref=f13e28]
+      - generic [ref=f13e29]:
+        - paragraph [ref=f13e30]: 共 0 条
+        - generic [ref=f13e31]:
+          - button [disabled]:
+            - img
+          - generic [ref=f13e32]: 1 / 0
+          - button [disabled]:
+            - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f13e38] [cursor=pointer]:
+    - img [ref=f13e39]

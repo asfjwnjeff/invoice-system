@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";;
 
 const db = new PrismaClient();
 
@@ -60,10 +60,10 @@ async function main() {
 
   // Invoice Items
   const items = [
-    { name: "关务服务费", taxCode: "304030101", unit: "次", feeType: "CUSTOMS_SERVICE" as const },
-    { name: "仓储服务费", taxCode: "304030201", unit: "月", feeType: "WAREHOUSE_SERVICE" as const },
-    { name: "运输服务费", taxCode: "301010201", unit: "票", feeType: "TRANSPORT_SERVICE" as const },
-    { name: "代理服务费", taxCode: "304030301", unit: "次", feeType: "AGENCY_SERVICE" as const },
+    { name: "关务服务费", taxCode: "304030101", unit: "次" },
+    { name: "仓储服务费", taxCode: "304030201", unit: "月" },
+    { name: "运输服务费", taxCode: "301010201", unit: "票" },
+    { name: "代理服务费", taxCode: "304030301", unit: "次" },
   ];
   for (const item of items) {
     await db.invoiceItem.create({ data: item });

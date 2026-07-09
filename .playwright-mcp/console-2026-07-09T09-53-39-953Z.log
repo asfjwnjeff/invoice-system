@@ -1,0 +1,211 @@
+[      47ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/login:0
+[     177ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[     309ms] Error: ./src/app/globals.css:2107:8
+Parsing CSS source code failed
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:2107:8
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component]
+
+
+    at <unknown> (Error: ./src/app/globals.css:2107:8)
+    at <unknown> (./src/app/globals.css:2107:8)
+    at Object.getCompilationErrors (file://D:\金融组文件\发票系统\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1186:59)
+    at DevBundlerService.getCompilationError (file://D:\金融组文件\发票系统\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://D:\金融组文件\发票系统\node_modules\next\dist\server\dev\next-dev-server.js:720:42)
+    at DevServer.findPageComponents (file://D:\金融组文件\发票系统\node_modules\next\dist\server\dev\next-dev-server.js:690:43)
+    at async DevServer.renderErrorToResponseImpl (file://D:\金融组文件\发票系统\node_modules\next\dist\server\base-server.js:1753:26)
+[     319ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[     326ms] [ERROR] ./src/app/globals.css:2107:8
+Parsing CSS source code failed
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:2107:8
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1945
+[     344ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/favicon.ico:0
+[     428ms] [ERROR] ./src/app/globals.css:2107:8
+Parsing CSS source code failed
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:2107:8
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1945
+[     447ms] [ERROR] ./src/app/globals.css:2107:8
+Parsing CSS source code failed
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:2107:8
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1945
+[     529ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[    4611ms] [ERROR] ./src/app/globals.css:2107:8
+Parsing CSS source code failed
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:2107:8
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1945
+[   13494ms] [ERROR] ./src/app/globals.css:2107:8
+Parsing CSS source code failed
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+@import rules must precede all rules aside from @charset and @layer statements
+
+Generated code of PostCSS transform of file content of src/app/globals.css:
+./src/app/globals.css:2107:8
+  2105 |   }
+  2106 | }
+> 2107 | @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=...
+       |        ^
+  2108 | :root {
+  2109 |   --radius: 0.375rem;
+  2110 |   --background: #F8F7F5;
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1945
+[   13570ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[   84536ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[   85415ms] [LOG] [Fast Refresh] done in 519ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[   85495ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/login:0
+[   85611ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[   85747ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[   86015ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[   91913ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) %o @ http://localhost:3000/login:0
+[   96265ms] [LOG] [Fast Refresh] done in 10289ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[   96266ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/auth/session:0
+[   96335ms] [ERROR] ClientFetchError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON. Read more at https://errors.authjs.dev#autherror
+    at fetchData (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:287:22)
+    at async getSession (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:454:21)
+    at async SessionProvider.useEffect (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:597:51) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[   96477ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/auth/session:0
+[   96481ms] [ERROR] ClientFetchError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON. Read more at https://errors.authjs.dev#autherror
+    at fetchData (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:287:22)
+    at async getSession (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:454:21)
+    at async SessionProvider.useEffect (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:597:51) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[   96770ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/auth/session:0
+[   96771ms] [ERROR] ClientFetchError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON. Read more at https://errors.authjs.dev#autherror
+    at fetchData (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:287:22)
+    at async getSession (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:454:21)
+    at async SessionProvider.useEffect [as _getSession] (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:597:51) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[   96801ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/auth/session:0
+[   96802ms] [ERROR] ClientFetchError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON. Read more at https://errors.authjs.dev#autherror
+    at fetchData (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:287:22)
+    at async getSession (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:454:21)
+    at async SessionProvider.useEffect [as _getSession] (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:597:51) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[   96826ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/auth/session:0
+[   96826ms] [ERROR] ClientFetchError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON. Read more at https://errors.authjs.dev#autherror
+    at fetchData (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:287:22)
+    at async getSession (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:454:21)
+    at async SessionProvider.useEffect [as _getSession] (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:597:51) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[   96849ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/auth/session:0
+[   96851ms] [ERROR] ClientFetchError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON. Read more at https://errors.authjs.dev#autherror
+    at fetchData (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:287:22)
+    at async getSession (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:454:21)
+    at async SessionProvider.useEffect [as _getSession] (http://localhost:3000/_next/static/chunks/node_modules_0c5-4ku._.js:597:51) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[   96851ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[   96911ms] [LOG] [Fast Refresh] done in 160ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477

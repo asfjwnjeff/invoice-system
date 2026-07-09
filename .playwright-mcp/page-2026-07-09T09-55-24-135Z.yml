@@ -1,0 +1,19 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - generic [ref=f2e6]: 发票管理系统
+      - generic [ref=f2e7]: 半导体供应链服务商发票管理中台
+    - generic [ref=f2e9]:
+      - generic [ref=f2e10]:
+        - generic [ref=f2e11]: 邮箱
+        - textbox "邮箱" [ref=f2e12]:
+          - /placeholder: admin@invoice.local
+      - generic [ref=f2e13]:
+        - generic [ref=f2e14]: 密码
+        - textbox "密码" [ref=f2e15]:
+          - /placeholder: ••••••••
+      - button "登录" [ref=f2e16]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f2e22] [cursor=pointer]:
+    - img [ref=f2e23]
+  - alert [ref=f2e26]

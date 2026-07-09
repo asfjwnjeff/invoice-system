@@ -1,0 +1,36 @@
+- generic [active] [ref=f11e1]:
+  - generic [ref=f11e3]:
+    - generic [ref=f11e4]:
+      - generic [ref=f11e5]:
+        - heading "客户管理" [level=1] [ref=f11e6]
+        - paragraph [ref=f11e7]: 管理委托公司提供供应链服务的客户
+      - button "新增客户" [ref=f11e8]:
+        - img
+        - text: 新增客户
+    - generic [ref=f11e9]:
+      - generic [ref=f11e10]:
+        - img [ref=f11e11]
+        - textbox "搜索客户名称或税号..." [ref=f11e14]
+      - table [ref=f11e17]:
+        - rowgroup [ref=f11e18]:
+          - row "客户名称 税号 联系人 电话 状态 操作" [ref=f11e19]:
+            - columnheader "客户名称" [ref=f11e20]
+            - columnheader "税号" [ref=f11e21]
+            - columnheader "联系人" [ref=f11e22]
+            - columnheader "电话" [ref=f11e23]
+            - columnheader "状态" [ref=f11e24]
+            - columnheader "操作" [ref=f11e25]
+        - rowgroup [ref=f11e26]:
+          - row "暂无数据" [ref=f11e27]:
+            - cell "暂无数据" [ref=f11e28]
+      - generic [ref=f11e29]:
+        - paragraph [ref=f11e30]: 共 0 条
+        - generic [ref=f11e31]:
+          - button [disabled]:
+            - img
+          - generic [ref=f11e32]: 1 / 0
+          - button [disabled]:
+            - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f11e38] [cursor=pointer]:
+    - img [ref=f11e39]

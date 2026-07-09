@@ -1,0 +1,37 @@
+- generic [active] [ref=f12e1]:
+  - generic [ref=f12e3]:
+    - generic [ref=f12e4]:
+      - generic [ref=f12e5]:
+        - heading "开票申请" [level=1] [ref=f12e6]
+        - paragraph [ref=f12e7]: 由结算单或业务单据生成的开票请求
+      - button "新建申请" [ref=f12e8]:
+        - img
+        - text: 新建申请
+    - generic [ref=f12e9]:
+      - generic [ref=f12e10]:
+        - img [ref=f12e11]
+        - textbox "搜索购买方..." [ref=f12e14]
+      - table [ref=f12e17]:
+        - rowgroup [ref=f12e18]:
+          - row "申请号 购买方 发票类型 价税合计 状态 创建时间 操作" [ref=f12e19]:
+            - columnheader "申请号" [ref=f12e20]
+            - columnheader "购买方" [ref=f12e21]
+            - columnheader "发票类型" [ref=f12e22]
+            - columnheader "价税合计" [ref=f12e23]
+            - columnheader "状态" [ref=f12e24]
+            - columnheader "创建时间" [ref=f12e25]
+            - columnheader "操作" [ref=f12e26]
+        - rowgroup [ref=f12e27]:
+          - row "暂无数据" [ref=f12e28]:
+            - cell "暂无数据" [ref=f12e29]
+      - generic [ref=f12e30]:
+        - paragraph [ref=f12e31]: 共 0 条
+        - generic [ref=f12e32]:
+          - button [disabled]:
+            - img
+          - generic [ref=f12e33]: 1 / 0
+          - button [disabled]:
+            - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f12e39] [cursor=pointer]:
+    - img [ref=f12e40]

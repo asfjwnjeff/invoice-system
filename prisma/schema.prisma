@@ -3,298 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-// ─── Enums ───────────────────────────────────────────────────────
-
-enum InvoiceDirection {
-  OUTPUT
-  INPUT
-}
-
-enum BlueRedFlag {
-  BLUE
-  RED
-}
-
-enum InvoiceCategory {
-  DIGITAL_SPECIAL
-  DIGITAL_NORMAL
-  VAT_SPECIAL
-  VAT_NORMAL
-  E_NORMAL
-  CUSTOMS_IMPORT_VAT_PAYMENT
-  CUSTOMS_DUTY_PAYMENT
-  TRANSPORT_INVOICE
-  WAREHOUSE_INVOICE
-  ADVANCE_PAYMENT_NOTICE
-  RED_INVOICE
-}
-
-enum FeeType {
-  CUSTOMS_SERVICE
-  WAREHOUSE_SERVICE
-  TRANSPORT_SERVICE
-  AGENCY_SERVICE
-  CUSTOMS_DUTY
-  IMPORT_VAT
-  INSPECTION_FEE
-  PORT_FEE
-  INSURANCE
-  COURIER_FEE
-  OTHER_ADVANCE
-}
-
-enum AdvanceStatus {
-  DRAFT
-  PENDING_CONFIRM
-  CONFIRMED
-  PENDING_COLLECTION
-  PARTIALLY_COLLECTED
-  COLLECTED
-  WRITTEN_OFF
-  CANCELLED
-  DISPUTED
-}
-
-enum AppStatus {
-  DRAFT
-  READY
-  PENDING_APPROVAL
-  REJECTED
-  PENDING_ISSUE
-  ISSUING
-  ISSUED
-  ISSUE_FAILED
-  DELIVERED
-  RED_FLUSHED
-  PARTIALLY_RED_FLUSHED
-  VOIDED
-  CANCELLED
-}
-
-enum RedFlushStatus {
-  DRAFT
-  PENDING_APPROVAL
-  REJECTED
-  PENDING_CONFIRM_FORM
-  WAITING_COUNTERPART_CONFIRM
-  CONFIRMED
-  CONFIRM_FORM_EXPIRED
-  RED_ISSUING
-  RED_ISSUED
-  RED_FAILED
-  COMPLETED
-  CANCELLED
-}
-
-enum VoidStatus {
-  DRAFT
-  PENDING_APPROVAL
-  APPROVED
-  REJECTED
-  EXECUTED
-  CANCELLED
-}
-
-enum VerifyStatus {
-  PENDING
-  VERIFIED
-  VERIFY_FAILED
-  NOT_FOUND
-  AMOUNT_MISMATCH
-  SELLER_ABNORMAL
-  VOIDED
-  RED_FLUSHED
-  TIMEOUT
-}
-
-enum DeductStatus {
-  PENDING
-  DEDUCTED
-  NON_DEDUCT
-  DEDUCT_FAILED
-}
-
-enum AccountStatus {
-  UNACCOUNTED
-  ACCOUNTED
-}
-
-enum ArchiveStatus {
-  UNARCHIVED
-  PENDING_ARCHIVE
-  ARCHIVED
-  SUPPLEMENTED
-}
-
-enum DeliveryStatus {
-  PENDING
-  DELIVERING
-  DELIVERED
-  FAILED
-  DOWNLOADED
-  PRINTED
-  REDELIVERED
-}
-
-enum PayerType {
-  COMPANY
-  CUSTOMER
-  THIRD_PARTY
-}
-
-enum InvoiceStrategy {
-  NO_INVOICE
-  SEPARATE_INVOICE
-  MERGE_WITH_SERVICE
-  SERVICE_ONLY
-  NET_AMOUNT_INVOICE
-  MANUAL
-}
-
-enum AdvanceCollectionStatus {
-  PENDING
-  PARTIALLY_COLLECTED
-  COLLECTED
-}
-
-enum WriteOffStatus {
-  PENDING
-  WRITTEN_OFF
-}
-
-enum SettlementStatus {
-  DRAFT
-  PENDING_BIZ_CONFIRM
-  PENDING_FIN_CONFIRM
-  PENDING_CUSTOMER_CONFIRM
-  CONFIRMED
-  PARTIALLY_INVOICED
-  INVOICED
-  PARTIALLY_RECEIVED
-  RECEIVED
-  CLOSED
-  CANCELLED
-}
-
-enum RiskLevel {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum OrderStatus {
-  DRAFT
-  ACTIVE
-  IN_PROGRESS
-  COMPLETED
-  CLOSED
-  CANCELLED
-}
-
-enum Currency {
-  CNY
-  USD
-  EUR
-  HKD
-  JPY
-  KRW
-  TWD
-}
-
-enum RedFlushType {
-  FULL
-  PARTIAL
-  REISSUE
-  DISCOUNT
-  SERVICE_TERMINATION
-  RETURN
-}
-
-enum RedFlushReason {
-  SALES_RETURN
-  SERVICE_TERMINATION
-  INVOICE_ERROR
-  AMOUNT_DISCOUNT
-  OTHER
-}
-
-enum VoidReason {
-  BUYER_INFO_ERROR
-  TAX_NO_ERROR
-  AMOUNT_ERROR
-  TAX_RATE_ERROR
-  ITEM_ERROR
-  DUPLICATE_ISSUE
-  CUSTOMER_CANCELLED
-  BUSINESS_CANCELLED
-  OTHER
-}
-
-enum VoidCategory {
-  APPLICATION_CANCEL
-  LEGACY_INVOICE_VOID
-  AGENCY_INVOICE_VOID
-}
-
-enum SourceType {
-  MANUAL
-  SETTLEMENT
-  BUSINESS_ORDER
-  ADVANCE_PAYMENT
-  IMPORT
-  API
-}
-
-enum DeliveryMethod {
-  EMAIL
-  QR_CODE
-  DOWNLOAD
-  API_PUSH
-  CUSTOMER_PORTAL
-}
-
-enum SettlementType {
-  CUSTOMER_RECEIVABLE
-  SUPPLIER_PAYABLE
-  ADVANCE_SETTLEMENT
-  COMPREHENSIVE
-}
-
-enum InputInvoiceStatus {
-  PENDING_PARSE
-  PARSED
-  PENDING_VERIFY
-  VERIFIED
-  VERIFY_FAILED
-  PENDING_MATCH
-  MATCHED
-  PENDING_DEDUCT
-  DEDUCTED
-  NON_DEDUCT
-  ACCOUNTED
-  ARCHIVED
-  RED_FLUSHED
-  ABNORMAL
-}
-
-enum CustomsPaymentBookType {
-  IMPORT_VAT_PAYMENT
-  CUSTOMS_DUTY_PAYMENT
-  OTHER_TAX
-}
-
-enum CustomsTaxType {
-  CUSTOMS_DUTY
-  IMPORT_VAT
-  CONSUMPTION_TAX
-  OTHER
-}
-
-// ─── Models ──────────────────────────────────────────────────────
 
 model Organization {
   id          String   @id @default(cuid())
@@ -306,7 +18,7 @@ model Organization {
   children    Organization[] @relation("OrgHierarchy")
   isActive    Boolean  @default(true) @map("is_active")
   description String?
-  attachments Json     @default("[]")
+  attachments String     @default("[]")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -353,7 +65,7 @@ model TaxSubject {
   organization   Organization @relation(fields: [organizationId], references: [id])
   isDefault      Boolean      @default(false) @map("is_default")
   isActive       Boolean      @default(true) @map("is_active")
-  attachments    Json         @default("[]")
+  attachments    String         @default("[]")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
@@ -375,13 +87,13 @@ model Customer {
   contactPerson  String?      @map("contact_person")
   contactPhone   String?      @map("contact_phone")
   contactEmail   String?      @map("contact_email")
-  invoiceStrategy InvoiceStrategy @default(NO_INVOICE) @map("invoice_strategy")
+  invoiceStrategy String @default("NO_INVOICE") @map("invoice_strategy")
   isBlacklisted  Boolean      @default(false) @map("is_blacklisted")
   isActive       Boolean      @default(true) @map("is_active")
   organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id])
   remark         String?
-  attachments    Json         @default("[]")
+  attachments    String         @default("[]")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
@@ -413,7 +125,7 @@ model Supplier {
   organizationId String       @map("organization_id")
   organization   Organization @relation(fields: [organizationId], references: [id])
   remark         String?
-  attachments    Json         @default("[]")
+  attachments    String         @default("[]")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
@@ -433,7 +145,7 @@ model InvoiceItem {
   spec        String?
   isActive    Boolean  @default(true) @map("is_active")
   remark      String?
-  attachments Json     @default("[]")
+  attachments String     @default("[]")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -469,18 +181,18 @@ model BusinessOrder {
   customer              Customer    @relation(fields: [customerId], references: [id])
   organizationId        String      @map("organization_id")
   organization          Organization @relation(fields: [organizationId], references: [id])
-  status                OrderStatus @default(DRAFT)
+  status                String @default("DRAFT")
   totalAdvanceAmount    Decimal     @default(0) @map("total_advance_amount")
   collectedAdvanceAmount Decimal    @default(0) @map("collected_advance_amount")
   uncollectedAdvanceAmount Decimal  @default(0) @map("uncollected_advance_amount")
   totalRevenueAmount    Decimal     @default(0) @map("total_revenue_amount")
   invoicedAmount        Decimal     @default(0) @map("invoiced_amount")
   availableAmount       Decimal     @default(0) @map("available_amount")
-  currency              Currency    @default(CNY)
+  currency              String    @default("CNY")
   startDate             DateTime?   @map("start_date")
   endDate               DateTime?   @map("end_date")
   remark                String?
-  attachments           Json        @default("[]")
+  attachments           String        @default("[]")
   createdAt             DateTime    @default(now()) @map("created_at")
   updatedAt             DateTime    @updatedAt @map("updated_at")
 
@@ -504,12 +216,12 @@ model RevenueOrder {
   invoicedAmount   Decimal       @default(0) @map("invoiced_amount")
   availableAmount  Decimal       @default(0) @map("available_amount")
   invoiceStatus    String        @default("NOT_INVOICED") @map("invoice_status")
-  currency         Currency      @default(CNY)
+  currency         String      @default("CNY")
   startDate        DateTime?     @map("start_date")
   endDate          DateTime?     @map("end_date")
   isActive         Boolean       @default(true) @map("is_active")
   remark           String?
-  attachments      Json          @default("[]")
+  attachments      String          @default("[]")
   createdAt        DateTime      @default(now()) @map("created_at")
   updatedAt        DateTime      @updatedAt @map("updated_at")
 
@@ -544,18 +256,18 @@ model FeeItem {
   feeNo           String        @unique @map("fee_no")
   businessOrderId String        @map("business_order_id")
   businessOrder   BusinessOrder @relation(fields: [businessOrderId], references: [id])
-  feeType         FeeType       @map("fee_type")
+  feeType         String       @map("fee_type")
   description     String?
   quantity        Decimal       @default(1)
   unitPrice       Decimal       @default(0) @map("unit_price")
   amount          Decimal       @default(0)
-  currency        Currency      @default(CNY)
+  currency        String      @default("CNY")
   exchangeRate    Decimal?      @default(1) @map("exchange_rate")
   baseAmount      Decimal       @default(0) @map("base_amount")
   occurredDate    DateTime      @map("occurred_date")
   isInvoiced      Boolean       @default(false) @map("is_invoiced")
   remark          String?
-  attachments     Json          @default("[]")
+  attachments     String          @default("[]")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
@@ -570,24 +282,24 @@ model AdvancePayment {
   businessOrderId            String                   @map("business_order_id")
   businessOrder              BusinessOrder            @relation(fields: [businessOrderId], references: [id])
   customsDeclarationId       String?                  @map("customs_declaration_id")
-  feeType                    FeeType                  @map("fee_type")
+  feeType                    String                  @map("fee_type")
   occurredDate               DateTime                 @map("occurred_date")
-  currency                   Currency                 @default(CNY)
+  currency                   String                 @default("CNY")
   originalAmount             Decimal                  @default(0) @map("original_amount")
   exchangeRate               Decimal?                 @default(1) @map("exchange_rate")
   baseCurrencyAmount         Decimal                  @default(0) @map("base_currency_amount")
-  payerType                  PayerType                @default(COMPANY) @map("payer_type")
-  invoiceStrategy            InvoiceStrategy          @default(NO_INVOICE) @map("invoice_strategy")
-  collectionStatus           AdvanceCollectionStatus  @default(PENDING) @map("collection_status")
-  writeOffStatus             WriteOffStatus           @default(PENDING) @map("write_off_status")
-  status                     AdvanceStatus            @default(DRAFT)
+  payerType                  String                @default("COMPANY") @map("payer_type")
+  invoiceStrategy            String          @default("NO_INVOICE") @map("invoice_strategy")
+  collectionStatus           String  @default("PENDING") @map("collection_status")
+  writeOffStatus             String           @default("PENDING") @map("write_off_status")
+  status                     String            @default("DRAFT")
   isInvoiced                 Boolean                  @default(false) @map("is_invoiced")
   isInSettlement             Boolean                  @default(false) @map("is_in_settlement")
   relatedInvoiceId           String?                  @map("related_invoice_id")
   relatedCustomsPaymentBookId String?                 @map("related_customs_payment_book_id")
   collectedAmount            Decimal                  @default(0) @map("collected_amount")
   remark                     String?
-  attachments                Json                     @default("[]")
+  attachments                String                     @default("[]")
   createdBy                  String?                  @map("created_by")
   creator                    User?                    @relation("CreatedByAdvancePayments", fields: [createdBy], references: [id])
   createdAt                  DateTime                 @default(now()) @map("created_at")
@@ -601,7 +313,7 @@ model AdvancePayment {
 model Settlement {
   id             String           @id @default(cuid())
   settlementNo   String           @unique @map("settlement_no")
-  settlementType SettlementType   @map("settlement_type")
+  settlementType String   @map("settlement_type")
   customerId     String?          @map("customer_id")
   customer       Customer?        @relation(fields: [customerId], references: [id])
   supplierId     String?          @map("supplier_id")
@@ -614,11 +326,11 @@ model Settlement {
   totalAmount    Decimal          @default(0) @map("total_amount")
   invoicedAmount Decimal          @default(0) @map("invoiced_amount")
   receivedAmount Decimal          @default(0) @map("received_amount")
-  currency       Currency         @default(CNY)
-  status         SettlementStatus @default(DRAFT)
+  currency       String         @default("CNY")
+  status         String @default("DRAFT")
   isAdvanceIncluded Boolean       @default(false) @map("is_advance_included")
   remark         String?
-  attachments    Json             @default("[]")
+  attachments    String             @default("[]")
   createdBy      String?          @map("created_by")
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
@@ -633,7 +345,7 @@ model SettlementItem {
   id               String          @id @default(cuid())
   settlementId     String          @map("settlement_id")
   settlement       Settlement      @relation(fields: [settlementId], references: [id])
-  feeType          FeeType         @map("fee_type")
+  feeType          String         @map("fee_type")
   description      String?
   amount           Decimal         @default(0)
   taxRate          Decimal?        @map("tax_rate")
@@ -653,7 +365,7 @@ model SettlementItem {
 model OutputInvoiceApplication {
   id                String      @id @default(cuid())
   applicationNo     String      @unique @map("application_no")
-  sourceType        SourceType  @map("source_type")
+  sourceType        String  @map("source_type")
   sourceId          String?     @map("source_id")
   revenueOrderId    String?     @map("revenue_order_id")
   revenueOrder      RevenueOrder? @relation(fields: [revenueOrderId], references: [id])
@@ -670,19 +382,19 @@ model OutputInvoiceApplication {
   buyerPhone        String?     @map("buyer_phone")
   buyerBankName     String?     @map("buyer_bank_name")
   buyerBankAccount  String?     @map("buyer_bank_account")
-  invoiceCategory   InvoiceCategory @map("invoice_category")
+  invoiceCategory   String @map("invoice_category")
   amountWithoutTax  Decimal     @default(0) @map("amount_without_tax")
   taxAmount         Decimal     @default(0) @map("tax_amount")
   amountWithTax     Decimal     @default(0) @map("amount_with_tax")
-  currency          Currency    @default(CNY)
+  currency          String    @default("CNY")
   exchangeRate      Decimal?    @default(1) @map("exchange_rate")
-  status            AppStatus   @default(DRAFT)
-  deliveryMethod    DeliveryMethod? @map("delivery_method")
+  status            String   @default("DRAFT")
+  deliveryMethod    String? @map("delivery_method")
   recipientEmail    String?     @map("recipient_email")
   remark            String?
   invoiceNo         String?     @map("invoice_no")
   taxSerialNo       String?     @map("tax_serial_no")
-  attachments       Json        @default("[]")
+  attachments       String        @default("[]")
   createdBy         String?     @map("created_by")
   creator           User?       @relation("CreatedByUser", fields: [createdBy], references: [id])
   approvedBy        String?     @map("approved_by")
@@ -711,7 +423,7 @@ model OutputInvoiceApplicationItem {
   taxRate                   Decimal                    @default(0) @map("tax_rate")
   taxAmount                 Decimal                    @default(0) @map("tax_amount")
   totalAmount               Decimal                    @default(0) @map("total_amount")
-  feeType                   FeeType?                   @map("fee_type")
+  feeType                   String?                   @map("fee_type")
   feeItemId                 String?                    @map("fee_item_id")
   advancePaymentId          String?                    @map("advance_payment_id")
   sortOrder                 Int                        @default(0) @map("sort_order")
@@ -725,9 +437,9 @@ model OutputInvoice {
   id                String                     @id @default(cuid())
   invoiceNo         String                     @unique @map("invoice_no")
   invoiceCode       String?                    @map("invoice_code")
-  invoiceCategory   InvoiceCategory            @map("invoice_category")
-  direction         InvoiceDirection           @default(OUTPUT)
-  blueRedFlag       BlueRedFlag                @default(BLUE) @map("blue_red_flag")
+  invoiceCategory   String            @map("invoice_category")
+  direction         String           @default("OUTPUT")
+  blueRedFlag       String                @default("BLUE") @map("blue_red_flag")
   applicationId     String?                    @unique @map("application_id")
   application       OutputInvoiceApplication?  @relation(fields: [applicationId], references: [id])
   taxSubjectId      String                     @map("tax_subject_id")
@@ -744,15 +456,15 @@ model OutputInvoice {
   amountWithoutTax  Decimal                    @default(0) @map("amount_without_tax")
   taxAmount         Decimal                    @default(0) @map("tax_amount")
   amountWithTax     Decimal                    @default(0) @map("amount_with_tax")
-  currency          Currency                   @default(CNY)
+  currency          String                   @default("CNY")
   remark            String?
-  deliveryStatus    DeliveryStatus             @default(PENDING) @map("delivery_status")
-  verifyStatus      VerifyStatus               @default(PENDING) @map("verify_status")
-  redFlushStatus    RedFlushStatus?            @map("red_flush_status")
-  voidStatus        VoidStatus?                @map("void_status")
-  accountStatus     AccountStatus              @default(UNACCOUNTED) @map("account_status")
-  archiveStatus     ArchiveStatus              @default(UNARCHIVED) @map("archive_status")
-  attachments       Json                       @default("[]")
+  deliveryStatus    String             @default("PENDING") @map("delivery_status")
+  verifyStatus      String               @default("PENDING") @map("verify_status")
+  redFlushStatus    String?            @map("red_flush_status")
+  voidStatus        String?                @map("void_status")
+  accountStatus     String              @default("UNACCOUNTED") @map("account_status")
+  archiveStatus     String              @default("UNARCHIVED") @map("archive_status")
+  attachments       String                       @default("[]")
   createdAt         DateTime                   @default(now()) @map("created_at")
   updatedAt         DateTime                   @updatedAt @map("updated_at")
 
@@ -782,7 +494,7 @@ model OutputInvoiceItem {
   taxRate               Decimal      @default(0) @map("tax_rate")
   taxAmount             Decimal      @default(0) @map("tax_amount")
   totalAmount           Decimal      @default(0) @map("total_amount")
-  feeType               FeeType?     @map("fee_type")
+  feeType               String?     @map("fee_type")
   sortOrder             Int          @default(0) @map("sort_order")
   createdAt             DateTime     @default(now()) @map("created_at")
   updatedAt             DateTime     @updatedAt @map("updated_at")
@@ -794,9 +506,9 @@ model InputInvoice {
   id                   String            @id @default(cuid())
   invoiceNo            String            @map("invoice_no")
   invoiceCode          String?           @map("invoice_code")
-  invoiceCategory      InvoiceCategory   @map("invoice_category")
-  direction            InvoiceDirection  @default(INPUT)
-  blueRedFlag          BlueRedFlag       @default(BLUE) @map("blue_red_flag")
+  invoiceCategory      String   @map("invoice_category")
+  direction            String  @default("INPUT")
+  blueRedFlag          String       @default("BLUE") @map("blue_red_flag")
   originalInvoiceId    String?           @map("original_invoice_id")
   sellerName           String            @map("seller_name")
   sellerTaxNo          String            @map("seller_tax_no")
@@ -815,17 +527,17 @@ model InputInvoice {
   taxAmount            Decimal           @default(0) @map("tax_amount")
   amountWithTax        Decimal           @default(0) @map("amount_with_tax")
   taxRate              Decimal?          @map("tax_rate")
-  currency             Currency          @default(CNY)
-  status               InputInvoiceStatus @default(PENDING_PARSE)
-  verifyStatus         VerifyStatus      @default(PENDING) @map("verify_status")
-  deductStatus         DeductStatus      @default(PENDING) @map("deduct_status")
-  accountStatus        AccountStatus     @default(UNACCOUNTED) @map("account_status")
-  archiveStatus        ArchiveStatus     @default(UNARCHIVED) @map("archive_status")
+  currency             String          @default("CNY")
+  status               String @default("PENDING_PARSE")
+  verifyStatus         String      @default("PENDING") @map("verify_status")
+  deductStatus         String      @default("PENDING") @map("deduct_status")
+  accountStatus        String     @default("UNACCOUNTED") @map("account_status")
+  archiveStatus        String     @default("UNARCHIVED") @map("archive_status")
   isAdvanceCost        Boolean           @default(false) @map("is_advance_cost")
-  costType             FeeType?          @map("cost_type")
+  costType             String?          @map("cost_type")
   costAllocationRatio  Decimal?          @default(100) @map("cost_allocation_ratio")
   remark               String?
-  attachments          Json              @default("[]")
+  attachments          String              @default("[]")
   createdAt            DateTime          @default(now()) @map("created_at")
   updatedAt            DateTime          @updatedAt @map("updated_at")
 
@@ -862,8 +574,8 @@ model InputInvoiceItem {
 model CustomsPaymentBook {
   id                   String                 @id @default(cuid())
   bookNo               String                 @unique @map("book_no")
-  bookType             CustomsPaymentBookType  @map("book_type")
-  taxType              CustomsTaxType          @map("tax_type")
+  bookType             String  @map("book_type")
+  taxType              String          @map("tax_type")
   paymentNo            String                 @map("payment_no")
   customsDeclarationNo String                 @map("customs_declaration_no")
   importPort           String?                @map("import_port")
@@ -873,14 +585,14 @@ model CustomsPaymentBook {
   taxpayerTaxNo        String?                @map("taxpayer_tax_no")
   taxAmount            Decimal                @default(0) @map("tax_amount")
   paymentDate          DateTime               @map("payment_date")
-  currency             Currency               @default(CNY)
+  currency             String               @default("CNY")
   isAdvance            Boolean                @default(false) @map("is_advance")
   advancePaymentId     String?                @map("advance_payment_id")
-  deductStatus         DeductStatus            @default(PENDING) @map("deduct_status")
-  accountStatus        AccountStatus           @default(UNACCOUNTED) @map("account_status")
-  archiveStatus        ArchiveStatus           @default(UNARCHIVED) @map("archive_status")
+  deductStatus         String            @default("PENDING") @map("deduct_status")
+  accountStatus        String           @default("UNACCOUNTED") @map("account_status")
+  archiveStatus        String           @default("UNARCHIVED") @map("archive_status")
   remark               String?
-  attachments          Json                   @default("[]")
+  attachments          String                   @default("[]")
   createdAt            DateTime               @default(now()) @map("created_at")
   updatedAt            DateTime               @updatedAt @map("updated_at")
 
@@ -892,20 +604,20 @@ model RedFlushApplication {
   applicationNo       String          @unique @map("application_no")
   originalInvoiceId   String          @map("original_invoice_id")
   originalInvoice     OutputInvoice   @relation(fields: [originalInvoiceId], references: [id])
-  redFlushType        RedFlushType    @map("red_flush_type")
-  redFlushReason      RedFlushReason  @map("red_flush_reason")
+  redFlushType        String    @map("red_flush_type")
+  redFlushReason      String  @map("red_flush_reason")
   reasonDescription   String          @map("reason_description")
   amountWithoutTax    Decimal         @default(0) @map("amount_without_tax")
   taxAmount           Decimal         @default(0) @map("tax_amount")
   amountWithTax       Decimal         @default(0) @map("amount_with_tax")
   needsReissue        Boolean         @default(false) @map("needs_reissue")
-  status              RedFlushStatus  @default(DRAFT)
+  status              String  @default("DRAFT")
   approvedBy          String?         @map("approved_by")
   confirmationFormId  String?         @unique @map("confirmation_form_id")
   confirmationForm    RedConfirmationForm? @relation("RedFlushConfirmationForm", fields: [confirmationFormId], references: [id])
   redInvoiceNo        String?         @map("red_invoice_no")
   reissueDraftId      String?         @map("reissue_draft_id")
-  attachments         Json            @default("[]")
+  attachments         String            @default("[]")
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
 
@@ -935,7 +647,7 @@ model RedConfirmationForm {
   id                      String              @id @default(cuid())
   formNo                  String              @unique @map("form_no")
   application             RedFlushApplication? @relation("RedFlushConfirmationForm")
-  status                  RedFlushStatus      @default(PENDING_CONFIRM_FORM)
+  status                  String      @default("PENDING_CONFIRM_FORM")
   counterpartConfirmed    Boolean             @default(false) @map("counterpart_confirmed")
   counterpartConfirmedAt  DateTime?           @map("counterpart_confirmed_at")
   expiredAt               DateTime?           @map("expired_at")
@@ -950,13 +662,13 @@ model VoidApplication {
   applicationNo   String       @unique @map("application_no")
   invoiceId       String?      @map("invoice_id")
   invoice         OutputInvoice? @relation(fields: [invoiceId], references: [id])
-  voidCategory    VoidCategory @map("void_category")
-  voidReason      VoidReason   @map("void_reason")
+  voidCategory    String @map("void_category")
+  voidReason      String   @map("void_reason")
   reasonDetail    String?      @map("reason_detail")
-  status          VoidStatus   @default(DRAFT)
+  status          String   @default("DRAFT")
   approvedBy      String?      @map("approved_by")
   executedAt      DateTime?    @map("executed_at")
-  attachments     Json         @default("[]")
+  attachments     String         @default("[]")
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
 
@@ -987,9 +699,9 @@ model InvoiceDeliveryRecord {
   id              String        @id @default(cuid())
   invoiceId       String        @map("invoice_id")
   invoice         OutputInvoice @relation(fields: [invoiceId], references: [id])
-  deliveryMethod  DeliveryMethod @map("delivery_method")
+  deliveryMethod  String @map("delivery_method")
   recipientEmail  String?       @map("recipient_email")
-  status          DeliveryStatus @default(PENDING)
+  status          String @default("PENDING")
   deliveredAt     DateTime?     @map("delivered_at")
   downloadCount   Int           @default(0) @map("download_count")
   printCount      Int           @default(0) @map("print_count")
@@ -1006,8 +718,8 @@ model InvoiceVerifyRecord {
   invoice         OutputInvoice @relation(fields: [invoiceId], references: [id])
   inputInvoiceId  String?      @map("input_invoice_id")
   inputInvoice    InputInvoice? @relation(fields: [inputInvoiceId], references: [id])
-  verifyStatus    VerifyStatus @map("verify_status")
-  verifyResult    Json?        @map("verify_result")
+  verifyStatus    String @map("verify_status")
+  verifyResult    String?        @map("verify_result")
   verifiedAt      DateTime?    @map("verified_at")
   errorMessage    String?      @map("error_message")
   createdAt       DateTime     @default(now()) @map("created_at")
@@ -1021,12 +733,12 @@ model ArchiveRecord {
   archiveNo     String        @unique @map("archive_no")
   entityType    String        @map("entity_type")
   entityId      String        @map("entity_id")
-  archiveStatus ArchiveStatus @default(PENDING_ARCHIVE) @map("archive_status")
+  archiveStatus String @default("PENDING_ARCHIVE") @map("archive_status")
   archivedBy    String?       @map("archived_by")
   archivedAt    DateTime?     @map("archived_at")
   voucherNo     String?       @map("voucher_no")
   remark        String?
-  attachments   Json          @default("[]")
+  attachments   String          @default("[]")
   createdAt     DateTime      @default(now()) @map("created_at")
   updatedAt     DateTime      @updatedAt @map("updated_at")
 
@@ -1040,8 +752,8 @@ model OperationLog {
   action      String
   entityType  String   @map("entity_type")
   entityId    String?  @map("entity_id")
-  oldValue    Json?    @map("old_value")
-  newValue    Json?    @map("new_value")
+  oldValue    String?    @map("old_value")
+  newValue    String?    @map("new_value")
   ipAddress   String?  @map("ip_address")
   userAgent   String?  @map("user_agent")
   createdAt   DateTime @default(now()) @map("created_at")
@@ -1053,7 +765,7 @@ model RiskResult {
   id          String    @id @default(cuid())
   ruleCode    String    @map("rule_code")
   ruleName    String    @map("rule_name")
-  riskLevel   RiskLevel @map("risk_level")
+  riskLevel   String @map("risk_level")
   entityType  String    @map("entity_type")
   entityId    String    @map("entity_id")
   description String?
