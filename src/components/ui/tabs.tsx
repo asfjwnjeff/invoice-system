@@ -1,77 +1,133 @@
 "use client"
 
-import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
+import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+interface TabsContextValue {
+  value: string
+  onValueChange: (value: string) => void
+  orientation: "horizontal" | "vertical"
+}
+
+const TabsContext = React.createContext<TabsContextValue | null>(null)
+
+function useTabs() {
+  const context = React.useContext(TabsContext)
+  if (!context) throw new Error("Tabs components must be used within <Tabs>")
+  return context
+}
+
+interface TabsProps extends React.ComponentProps<"div"> {
+  value: string
+  onValueChange: (value: string) => void
+  orientation?: "horizontal" | "vertical"
+}
+
 function Tabs({
   className,
   orientation = "horizontal",
+  value,
+  onValueChange,
   ...props
-}: TabsPrimitive.Root.Props) {
+}: TabsProps) {
   return (
-    <TabsPrimitive.Root
-      data-slot="tabs"
-      data-orientation={orientation}
-      className={cn(
-        "group/tabs flex gap-2 data-horizontal:flex-col",
-        className
-      )}
-      {...props}
-    />
+    <TabsContext.Provider value={{ value, onValueChange, orientation }}>
+      <div
+        data-slot="tabs"
+        data-orientation={orientation}
+        className={cn(
+          "group/tabs flex gap-2",
+          orientation === "horizontal" ? "flex-col" : "",
+          className
+        )}
+        {...props}
+      />
+    </TabsContext.Provider>
   )
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-horizontal/tabs:h-8 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col data-[variant=line]:rounded-none",
+  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground",
   {
     variants: {
       variant: {
         default: "bg-muted",
         line: "gap-1 bg-transparent",
       },
+      orientation: {
+        horizontal: "h-8",
+        vertical: "h-fit flex-col",
+      },
     },
     defaultVariants: {
       variant: "default",
+      orientation: "horizontal",
     },
   }
 )
+
+interface TabsListProps
+  extends React.ComponentProps<"div">,
+    VariantProps<typeof tabsListVariants> {}
 
 function TabsList({
   className,
   variant = "default",
   ...props
-}: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
+}: TabsListProps) {
+  const { orientation } = useTabs()
   return (
-    <TabsPrimitive.List
+    <div
+      role="tablist"
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      data-orientation={orientation}
+      className={cn(tabsListVariants({ variant, orientation }), className)}
       {...props}
     />
   )
 }
 
-function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
+interface TabsTriggerProps extends React.ComponentProps<"button"> {
+  triggerValue: string
+}
+
+function TabsTrigger({ className, triggerValue, ...props }: TabsTriggerProps) {
+  const { value, onValueChange } = useTabs()
+  const isActive = value === triggerValue
+
   return (
-    <TabsPrimitive.Tab
+    <button
+      type="button"
+      role="tab"
       data-slot="tabs-trigger"
+      data-state={isActive ? "active" : "inactive"}
       className={cn(
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 aria-disabled:pointer-events-none aria-disabled:opacity-50 dark:text-muted-foreground dark:hover:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
-        "data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground",
-        "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-right-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
+        "relative inline-flex flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap transition-all hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        isActive
+          ? "bg-background text-foreground shadow-sm dark:border-input dark:bg-input/30 dark:text-foreground"
+          : "text-foreground/60 dark:text-muted-foreground dark:hover:text-foreground",
         className
       )}
+      onClick={() => onValueChange(triggerValue)}
       {...props}
     />
   )
 }
 
-function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
+interface TabsContentProps extends React.ComponentProps<"div"> {
+  contentValue: string
+}
+
+function TabsContent({ className, contentValue, ...props }: TabsContentProps) {
+  const { value } = useTabs()
+  if (value !== contentValue) return null
+
   return (
-    <TabsPrimitive.Panel
+    <div
+      role="tabpanel"
       data-slot="tabs-content"
       className={cn("flex-1 text-sm outline-none", className)}
       {...props}

@@ -1,0 +1,7 @@
+{"metrics":[
+  {"name":"本月开票总额","label":"本月开票总额","formula":"SUM(销项发票.价税合计) WHERE 开票日期 IN 本月","unit":"元","category":"revenue"},
+  {"name":"可开票余额","label":"可开票余额","formula":"SUM(收入订单.可开票余额)","unit":"元","category":"revenue"},
+  {"name":"代垫收回率","label":"代垫收回率","formula":"已收代垫 / 代垫总额","unit":"%","category":"advance"},
+  {"name":"进项认证率","label":"进项认证率","formula":"已认证进项 / 全部进项","unit":"%","category":"tax"},
+  {"name":"高风险事项","label":"高风险事项","formula":"COUNT(风控结果 WHERE 等级>=高 AND 未处理)","unit":"条","category":"risk"}
+]}

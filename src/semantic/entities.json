@@ -1,0 +1,14 @@
+{"entities":[
+  {"name":"销项发票","tableName":"output_invoices","aliases":["开出的票","销项","蓝票","对外发票"],"description":"公司开给客户的发票","category":"发票类"},
+  {"name":"进项发票","tableName":"input_invoices","aliases":["收到的票","进项","供应商发票","成本票"],"description":"供应商开给公司的发票","category":"发票类"},
+  {"name":"开票申请","tableName":"output_invoice_applications","aliases":["开票请求","开票单"],"description":"由结算单或业务单据生成的开票请求","category":"发票类"},
+  {"name":"红冲申请","tableName":"red_flush_applications","aliases":["红字申请","冲红"],"description":"红冲蓝字发票的申请","category":"发票类"},
+  {"name":"代垫单","tableName":"advance_payments","aliases":["垫付款","代垫费用"],"description":"公司为客户代垫的费用","category":"财务类"},
+  {"name":"结算单","tableName":"settlements","aliases":["对账单","应收结算"],"description":"对客户的费用汇总结算","category":"财务类"},
+  {"name":"海关缴款书","tableName":"customs_payment_books","aliases":["海关票据","进口增值税票"],"description":"海关进口增值税专用缴款书","category":"关务类"},
+  {"name":"客户","tableName":"customers","aliases":["委托人","甲方"],"description":"委托公司提供供应链服务的客户","category":"基础资料"},
+  {"name":"供应商","tableName":"suppliers","aliases":["服务商","乙方"],"description":"仓储、运输、报关等供应商","category":"基础资料"},
+  {"name":"内部业务订单","tableName":"business_orders","aliases":["订单","服务单"],"description":"核心锚点：代垫/成本/收入均源于此","category":"业务类"},
+  {"name":"收入订单","tableName":"revenue_orders","aliases":["收入合同"],"description":"销项发票的可开票池","category":"财务类"},
+  {"name":"成本中心","tableName":"cost_centers","aliases":["部门","项目"],"description":"进项发票的成本归集目标","category":"财务类"}
+]}

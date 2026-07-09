@@ -1,0 +1,12 @@
+{"relationships":[
+  {"from":"内部业务订单","to":"代垫单","type":"one_to_many","description":"订单产生代垫"},
+  {"from":"内部业务订单","to":"收入订单","type":"one_to_many","description":"订单定义收入"},
+  {"from":"内部业务订单","to":"进项发票","type":"one_to_many","description":"订单归集成本"},
+  {"from":"收入订单","to":"结算单","type":"one_to_many","description":"合同分期结算"},
+  {"from":"结算单","to":"开票申请","type":"one_to_many","description":"结算驱动开票"},
+  {"from":"开票申请","to":"销项发票","type":"one_to_one","description":"申请生成发票"},
+  {"from":"进项发票","to":"成本中心","type":"many_to_one","description":"成本归集"},
+  {"from":"销项发票","to":"客户","type":"many_to_one","description":"发票去向"},
+  {"from":"销项发票","to":"红冲申请","type":"one_to_one","description":"蓝票到红冲"},
+  {"from":"代垫单","to":"海关缴款书","type":"many_to_one","description":"代垫来源"}
+]}
