@@ -113,6 +113,27 @@ async function main() {
       },
     });
     console.log("Created sample business order + revenue order");
+
+    // === Enhanced demo data ===
+
+    // Fee items
+    const feeTypes = ["CUSTOMS_SERVICE","WAREHOUSE_SERVICE","TRANSPORT_SERVICE"] as const;
+    const feeAmts = [50000,30000,20000];
+    for (let i=0;i<3;i++) await db.feeItem.create({ data: { feeNo:`FEE-2026-000${i+1}`, description:`${["关务服务费","仓储费","运输费"][i]}`, quantity:1, unitPrice:feeAmts[i]!, amount:feeAmts[i]!, baseAmount:feeAmts[i]!, feeType:feeTypes[i]!, occurredDate:new Date("2026-07-05"), businessOrderId:order.id } });
+    console.log("Created 3 fee items");
+
+    // Input invoices with various statuses
+    const cc = await db.costCenter.findFirst();
+    await db.inputInvoice.create({ data: { invoiceNo:"INP-2026-001", invoiceCategory:"VAT_SPECIAL", sellerName:"顺丰速运有限公司", sellerTaxNo:"91440300200000000A", buyerName:"深圳半导体供应链有限公司", buyerTaxNo:"91440300XXXXXXXXXX", issueDate:new Date("2026-07-05"), amountWithoutTax:7339.45, taxAmount:660.55, amountWithTax:8000, taxRate:9, status:"VERIFIED", verifyStatus:"VERIFIED", deductStatus:"DEDUCTED", entryMethod:"MANUAL", invoicePool:"INPUT", businessOrderId:order.id, costCenterId:cc?.id } });
+    await db.inputInvoice.create({ data: { invoiceNo:"INP-2026-002", invoiceCategory:"VAT_SPECIAL", sellerName:"京东物流集团", sellerTaxNo:"91110000300000000B", buyerName:"深圳半导体供应链有限公司", buyerTaxNo:"91440300XXXXXXXXXX", issueDate:new Date("2026-07-06"), amountWithoutTax:4716.98, taxAmount:283.02, amountWithTax:5000, taxRate:6, status:"PENDING_VERIFY", verifyStatus:"PENDING", deductStatus:"PENDING", entryMethod:"OCR", invoicePool:"INPUT" } });
+    await db.inputInvoice.create({ data: { invoiceNo:"INP-2026-003", invoiceCategory:"VAT_NORMAL", sellerName:"中外运报关有限公司", sellerTaxNo:"91310000400000000C", buyerName:"深圳半导体供应链有限公司", buyerTaxNo:"91440300XXXXXXXXXX", issueDate:new Date("2026-07-07"), amountWithoutTax:11320.75, taxAmount:679.25, amountWithTax:12000, taxRate:6, status:"VERIFY_FAILED", verifyStatus:"VERIFY_FAILED", deductStatus:"PENDING", entryMethod:"MANUAL", isFromTaxAuthority:true, invoicePool:"INPUT" } });
+    console.log("Created 3 input invoices");
+
+    // Risk results
+    await db.riskResult.create({ data: { ruleCode:"RISK-001", ruleName:"重复开票检查", entityType:"output_invoice", entityId:"INV-2026-000001", riskLevel:"LOW", description:"无重复", isResolved:true } });
+    await db.riskResult.create({ data: { ruleCode:"RISK-002", ruleName:"金额超限检查", entityType:"advance_payment", entityId:"ADV-2026-0001", riskLevel:"MEDIUM", description:"超过1万元需确认", isResolved:false } });
+    await db.riskResult.create({ data: { ruleCode:"RISK-003", ruleName:"抬头校验", entityType:"input_invoice", entityId:"INP-2026-003", riskLevel:"HIGH", description:"抬头不一致", isResolved:false } });
+    console.log("Created 3 risk results");
   }
 
   console.log("Seed completed successfully!");
