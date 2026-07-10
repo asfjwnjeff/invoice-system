@@ -136,6 +136,11 @@ async function main() {
     console.log("Created 3 risk results");
   }
 
+  // Demo approval instance
+  const steps = [{step:0,role:"business_manager",label:"业务经理",status:"APPROVED",assigneeId:"biz",assigneeName:"业务经理",comment:"同意",timestamp:new Date().toISOString()},{step:1,role:"finance_manager",label:"财务主管",status:"PENDING",assigneeId:null,assigneeName:null,comment:null,timestamp:null},{step:2,role:"admin",label:"总经理",status:"WAITING",assigneeId:null,assigneeName:null,comment:null,timestamp:null}];
+  await db.workflowInstance.create({ data: { entityType:"APPLICATION", entityId:"APP-2026-0001", entityTitle:"华为Q1开票申请 ¥100,000", totalSteps:3, currentStep:1, stepsData:JSON.stringify(steps), records:{ create: [{ stepOrder:0, approverId:"biz", approverName:"业务经理", action:"APPROVED", comment:"同意" }] } } });
+  console.log("Created demo approval instance");
+
   console.log("Seed completed successfully!");
 }
 

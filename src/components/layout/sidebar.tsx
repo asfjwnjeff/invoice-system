@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, Building2, Receipt, Tags, FileText, ChevronLeft, FileClock, Coins, Landmark, Calculator, FileSpreadsheet, Files, CreditCard, ScrollText, RotateCcw, Ban, ArrowDownToLine, Archive, ShieldAlert, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Receipt, Tags, FileText, ChevronLeft, FileClock, Coins, Landmark, Calculator, FileSpreadsheet, Files, CreditCard, ScrollText, RotateCcw, Ban, ArrowDownToLine, Archive, ShieldAlert, BarChart3, ClipboardCheck } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "工作台", icon: LayoutDashboard, section: "概览" },
+  { href: "/approvals", label: "审批中心", icon: ClipboardCheck, section: "概览" },
   { href: "/business-orders", label: "业务订单", icon: FileClock, section: "业务管理" },
   { href: "/fee-items", label: "费用管理", icon: Coins, section: "业务管理" },
   { href: "/revenue-orders", label: "收入订单", icon: Landmark, section: "业务管理" },
