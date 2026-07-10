@@ -20,6 +20,7 @@ const navItems = [
   { href: "/applications", label: "开票申请", icon: FileSpreadsheet, section: "销项发票" },
   { href: "/invoices", label: "销项发票", icon: Files, section: "销项发票" },
   { href: "/input-invoices", label: "进项发票", icon: ArrowDownToLine, section: "进项归档" },
+  { href: "/payment-applications", label: "付款申请", icon: CreditCard, section: "进项归档" },
   { href: "/archive-records", label: "电子档案", icon: Archive, section: "进项归档" },
   { href: "/customers", label: "客户管理", icon: Users, section: "基础资料" },
   { href: "/suppliers", label: "供应商管理", icon: Building2, section: "基础资料" },
