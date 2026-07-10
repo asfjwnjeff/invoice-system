@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, Building2, Receipt, Tags, FileText, ChevronLeft, FileClock, Coins, Landmark, Calculator, FileSpreadsheet, Files } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Receipt, Tags, FileText, ChevronLeft, FileClock, Coins, Landmark, Calculator, FileSpreadsheet, Files, CreditCard, ScrollText, RotateCcw, Ban } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "工作台", icon: LayoutDashboard, section: "概览" },
@@ -13,6 +13,10 @@ const navItems = [
   { href: "/fee-items", label: "费用管理", icon: Coins, section: "业务管理" },
   { href: "/revenue-orders", label: "收入订单", icon: Landmark, section: "业务管理" },
   { href: "/customer-settlements", label: "客户结算", icon: Calculator, section: "业务管理" },
+  { href: "/advance-payments", label: "代垫管理", icon: CreditCard, section: "代垫关务" },
+  { href: "/customs-payment-books", label: "海关票据", icon: ScrollText, section: "代垫关务" },
+  { href: "/red-flush", label: "红冲管理", icon: RotateCcw, section: "红冲作废" },
+  { href: "/void-applications", label: "作废管理", icon: Ban, section: "红冲作废" },
   { href: "/applications", label: "开票申请", icon: FileSpreadsheet, section: "销项发票" },
   { href: "/invoices", label: "销项发票", icon: Files, section: "销项发票" },
   { href: "/customers", label: "客户管理", icon: Users, section: "基础资料" },
