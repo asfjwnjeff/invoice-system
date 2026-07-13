@@ -109,26 +109,20 @@ function SelectContent({
 
   React.useEffect(() => {
     if (!triggerRef.current) return
+    let raf = 0
+    let prevKey = ""
     function calc() {
-      const rect = triggerRef.current!.getBoundingClientRect()
+      if (!triggerRef.current) return
+      const rect = triggerRef.current.getBoundingClientRect()
       const top = rect.bottom + 4
       const left = rect.left
-      const width = rect.width
-      // Adjust if dropdown would go below viewport
-      const estimatedHeight = 240
-      if (top + estimatedHeight > window.innerHeight) {
-        setPos({ top: rect.top - estimatedHeight - 4, left, width: Math.max(width, 144) })
-      } else {
-        setPos({ top, left, width: Math.max(width, 144) })
-      }
+      const width = Math.max(rect.width, 144)
+      const key = `${top}|${left}|${width}`
+      if (key !== prevKey) { prevKey = key; setPos({ top, left, width }) }
+      raf = requestAnimationFrame(calc)
     }
     calc()
-    window.addEventListener("scroll", calc, true)
-    window.addEventListener("resize", calc)
-    return () => {
-      window.removeEventListener("scroll", calc, true)
-      window.removeEventListener("resize", calc)
-    }
+    return () => cancelAnimationFrame(raf)
   }, [open, triggerRef])
 
   if (!pos) return null

@@ -12,7 +12,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-interface T { id: string; invoiceNo: string; invoiceCode: string|null; invoiceCategory: string; sellerName: string; buyerName: string; amountWithTax: number; issueDate: string|null; deliveryStatus: string; verifyStatus: string; headerValidationStatus: string; usageStatus: string; pushStatus: string; entryMethod: string; isFromTaxAuthority: boolean; invoicePool: string; createdAt: string; }
+interface T { id: string; invoiceNo: string; invoiceCode: string|null; invoiceCategory: string; sellerName: string; buyerName: string; amountWithTax: number; issueDate: string|null; deliveryStatus: string; verifyStatus: string; headerValidationStatus: string; usageStatus: string; pushStatus: string; entryMethod: string; isFromTaxAuthority: boolean; invoicePool: string; createdAt: string; recordedBy: string|null; }
 
 export default function InvoicesPage() {
   const qc = useQueryClient();
@@ -30,6 +30,7 @@ const headerLabels: Record<string, string> = { VALIDATED: "已校验", PENDING: 
 const usageLabels: Record<string, string> = { UNUSED: "未使用", USED: "已使用", RED_FLUSHED: "已红冲", VOIDED: "已作废", ARCHIVED: "已归档" };
 const sv = (s: string): "success"|"warning"|"danger"|"neutral" => s==="DELIVERED"||s==="VERIFIED"||s==="DEDUCTED"?"success":s==="FAILED"?"danger":s==="PENDING"?"warning":"neutral";
   const cols: ColumnDef<T>[] = [
+    { accessorKey:"invoiceCode", header:"发票代码", cell:({row}) => row.original.invoiceCode||"-" },
     { accessorKey:"invoiceNo", header:"发票号码", cell:({row}) => <span className="font-medium tabular-nums">{row.original.invoiceNo}</span> },
     { accessorKey:"invoiceCategory", header:"票种", cell:({row}) => catLabels[row.original.invoiceCategory] ?? row.original.invoiceCategory },
     { accessorKey:"sellerName", header:"销售方", cell:({row}) => row.original.sellerName||"-" },
@@ -38,10 +39,11 @@ const sv = (s: string): "success"|"warning"|"danger"|"neutral" => s==="DELIVERED
     { accessorKey:"issueDate", header:"开票日期", cell:({row}) => row.original.issueDate?.slice(0,10) ?? "-" },
     { accessorKey:"invoicePool", header:"所属票池" },
     { accessorKey:"verifyStatus", header:"查验状态", cell:({row}) => <StatusBadge status={verifyLabels[row.original.verifyStatus] ?? row.original.verifyStatus} variant={sv(row.original.verifyStatus)} /> },
-    { accessorKey:"headerValidationStatus", header:"抬头校验", cell:({row}) => <StatusBadge status={headerLabels[row.original.headerValidationStatus] ?? row.original.headerValidationStatus} variant={sv(row.original.headerValidationStatus)} /> },
     { accessorKey:"deliveryStatus", header:"交付状态", cell:({row}) => <StatusBadge status={deliveryLabels[row.original.deliveryStatus] ?? row.original.deliveryStatus} variant={sv(row.original.deliveryStatus)} /> },
     { accessorKey:"usageStatus", header:"使用状态", cell:({row}) => <StatusBadge status={usageLabels[row.original.usageStatus] ?? row.original.usageStatus} variant={row.original.usageStatus==="UNUSED"?"neutral":row.original.usageStatus==="RED_FLUSHED"?"danger":"success"} /> },
     { accessorKey:"entryMethod", header:"录入方式", cell:({row}) => emLabels[row.original.entryMethod] ?? row.original.entryMethod },
+    { accessorKey:"recordedBy", header:"录入人", cell:({row}) => row.original.recordedBy||"-" },
+    { accessorKey:"isFromTaxAuthority", header:"税局来源", cell:({row}) => row.original.isFromTaxAuthority?"是":"否" },
     { accessorKey:"createdAt", header:"录入时间", cell:({row}) => new Date(row.original.createdAt).toLocaleDateString("zh-CN") },
     { id:"act", header:"操作", cell:({row}) => <div className="flex gap-1"><Link href={`/invoices/${row.original.id}`}><Button variant="ghost" size="sm" className="h-8">查看</Button></Link><Link href={`/invoices/${row.original.id}/edit`}><Button variant="ghost" size="sm" className="h-8">编辑</Button></Link></div> },
   ];

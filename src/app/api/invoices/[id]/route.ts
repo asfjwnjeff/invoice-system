@@ -6,7 +6,14 @@ import { NextRequest } from "next/server";
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth(); if (!session) return error("未登录", 401);
   const { id } = await params;
-  const inv = await db.outputInvoice.findUnique({ where: { id }, include: { application: { include: { items: true } } } });
+  const inv = await db.outputInvoice.findUnique({
+    where: { id },
+    include: {
+      application: { include: { items: true } },
+      invoiceFiles: true,
+      items: { include: { invoiceItem: true } },
+    },
+  });
   return inv ? success(inv) : notFound();
 }
 
