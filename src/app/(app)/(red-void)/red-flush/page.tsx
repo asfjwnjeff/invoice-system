@@ -13,23 +13,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 interface T { id: string; appNo: string; originalInvoiceId: string; redFlushType: string; redFlushReason: string; amountWithTax: number; status: string; needsReissue: boolean; }
 
 export default function Page() {
   const qc = useQueryClient(); const [open, setOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [f, setF] = useState({ appNo:"RF-"+Date.now(), originalInvoiceId:"", redFlushType:"FULL", redFlushReason:"SALES_RETURN", reasonDetail:"", amountWithoutTax:0, taxAmount:0, amountWithTax:0, needsReissue:false });
   const { data } = useQuery({ queryKey:["red-flush"], queryFn: async () => { const r = await fetch("/api/red-flush"); return (await r.json()).data as { items: T[] }; } });
   const sm = useMutation({ mutationFn: async () => { const r = await fetch("/api/red-flush", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(f) }); return r.json(); }, onSuccess: (r) => { if (r.success) { toast.success("已创建"); setOpen(false); qc.invalidateQueries({ queryKey:["red-flush"] }); } else toast.error(r.error ?? "失败"); } });
   const dm = useMutation({ mutationFn: (id: string) => fetch(`/api/red-flush/${id}`, { method:"DELETE" }), onSuccess: () => { toast.success("已删除"); qc.invalidateQueries({ queryKey:["red-flush"] }); } });
-  const sv = (s: string): "success"|"warning"|"danger"|"neutral" => s==="COMPLETED"?"success":s==="REJECTED"?"danger":"warning";
+  const rfTypeLabels: Record<string, string> = { FULL: "全额红冲", PARTIAL: "部分红冲", REISSUE: "错票重开" };
+const rfReasonLabels: Record<string, string> = { SALES_RETURN: "销售退回", INVOICE_ERROR: "开票有误", AMOUNT_DISCOUNT: "销售折让", SERVICE_TERMINATION: "服务中止", OTHER: "其他" };
+const rfStatusLabels: Record<string, string> = { DRAFT: "草稿", PENDING_APPROVAL: "待审批", APPROVED: "已审批", REJECTED: "已驳回", COMPLETED: "已完成", CANCELLED: "已取消" };
+const sv = (s: string): "success"|"warning"|"danger"|"neutral" => s==="COMPLETED"?"success":s==="REJECTED"?"danger":"warning";
   const cols: ColumnDef<T>[] = [
     { accessorKey:"appNo", header:"申请号", cell:({ row }) => <span className="font-medium tabular-nums">{row.original.appNo}</span> },
-    { accessorKey:"redFlushType", header:"红冲类型" },
-    { accessorKey:"redFlushReason", header:"原因" },
+    { accessorKey:"redFlushType", header:"红冲类型", cell:({ row }) => rfTypeLabels[row.original.redFlushType] ?? row.original.redFlushType },
+    { accessorKey:"redFlushReason", header:"原因", cell:({ row }) => rfReasonLabels[row.original.redFlushReason] ?? row.original.redFlushReason },
     { accessorKey:"amountWithTax", header:"金额", cell:({ row }) => <span className="tabular-nums">¥{row.original.amountWithTax.toLocaleString()}</span> },
-    { accessorKey:"status", header:"状态", cell:({ row }) => <StatusBadge status={row.original.status} variant={sv(row.original.status)} /> },
-    { id:"act", header:"操作", cell:({ row }) => <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => dm.mutate(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button> },
+    { accessorKey:"status", header:"状态", cell:({ row }) => <StatusBadge status={rfStatusLabels[row.original.status] ?? row.original.status} variant={sv(row.original.status)} /> },
+    { id:"act", header:"操作", cell:({ row }) => <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button> },
   ];
   return (
     <div>
@@ -49,6 +54,16 @@ export default function Page() {
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>取消</Button><Button onClick={() => sm.mutate()}>{sm.isPending ? "提交中..." : "提交"}</Button></DialogFooter>
       </DialogContent></Dialog>
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={() => setDeleteId(null)}
+        title="确认删除"
+        description="确认要删除吗？此操作不可撤销。"
+        confirmLabel="删除"
+        variant="danger"
+        loading={dm.isPending}
+        onConfirm={() => deleteId && dm.mutate(deleteId)}
+      />
     </div>
   );
 }

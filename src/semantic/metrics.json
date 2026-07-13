@@ -1,7 +1,12 @@
 {"metrics":[
   {"name":"本月开票总额","label":"本月开票总额","formula":"SUM(销项发票.价税合计) WHERE 开票日期 IN 本月","unit":"元","category":"revenue"},
   {"name":"可开票余额","label":"可开票余额","formula":"SUM(收入订单.可开票余额)","unit":"元","category":"revenue"},
-  {"name":"代垫收回率","label":"代垫收回率","formula":"已收代垫 / 代垫总额","unit":"%","category":"advance"},
-  {"name":"进项认证率","label":"进项认证率","formula":"已认证进项 / 全部进项","unit":"%","category":"tax"},
-  {"name":"高风险事项","label":"高风险事项","formula":"COUNT(风控结果 WHERE 等级>=高 AND 未处理)","unit":"条","category":"risk"}
+  {"name":"代垫收回率","label":"代垫收回率","formula":"SUM(代垫单.已收金额) / SUM(代垫单.本位币金额) * 100","unit":"%","category":"advance"},
+  {"name":"进项认证率","label":"进项认证率","formula":"COUNT(进项发票 WHERE 认证状态=已认证) / COUNT(全部进项) * 100","unit":"%","category":"tax"},
+  {"name":"高风险事项","label":"高风险事项","formula":"COUNT(风控结果 WHERE 等级>=高 AND 未处理)","unit":"条","category":"risk"},
+  {"name":"代垫回收天数","label":"代垫回收天数","formula":"AVG(代垫单.收款日期 - 代垫单.发生日期) WHERE 已收款","unit":"天","category":"advance"},
+  {"name":"红冲率","label":"红冲率","formula":"COUNT(红冲申请 WHERE 已通过) / COUNT(销项发票) * 100","unit":"%","category":"revenue"},
+  {"name":"进项认证时效","label":"进项认证时效","formula":"AVG(进项发票.认证日期 - 进项发票.录入日期)","unit":"天","category":"tax"},
+  {"name":"审批流转耗时","label":"审批流转耗时","formula":"AVG(审批实例.完成时间 - 审批实例.创建时间) WHERE 已完成","unit":"小时","category":"workflow"},
+  {"name":"成本归集率","label":"成本归集率","formula":"COUNT(进项发票 WHERE 成本中心 IS NOT NULL) / COUNT(全部进项) * 100","unit":"%","category":"cost"}
 ]}

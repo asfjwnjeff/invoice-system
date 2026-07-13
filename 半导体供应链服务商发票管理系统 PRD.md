@@ -2001,7 +2001,134 @@ Mock 中心用于模拟外部系统行为，方便演示完整业务闭环。
 
 ---
 
-## 32. 本 PRD 的核心产品结论
+## 32. 实际实现状态 (v1.1 原型)
+
+> 本节记录原型 v1.1 的实际完成情况。v1.0 → v1.1 新增：销项/进项详情页与全页面编辑、列自定义拖拽排序、全部 UI 中文化、删除二次确认、业务订单详情页与全页面编辑。
+
+### 32.1 里程碑完成情况
+
+| 里程碑 | 状态 | 说明 |
+|--------|------|------|
+| M1 基础框架与主数据 | ✅ 完成 | 登录、工作台、客户、供应商、组织、税号、服务项目、税收编码、文件上传、操作日志 |
+| M2 销项与结算 | ✅ 完成 | 业务订单、收入订单、费用项、结算单、开票申请、模拟开票、销项发票详情页 |
+| M3 代垫与关务 | ✅ 完成 | 代垫单、海关缴款书、报关单关联、代垫入结算、收款核销 |
+| M4 红冲与作废 | ✅ 完成 | 红冲申请、红冲确认单、红字发票模拟、作废申请与审批 |
+| M5 进项与归档 | ✅ 完成 | 进项发票录入、Mock OCR、Mock 查验、进项发票全页面编辑 |
+| M6 风控与报表 | ✅ 完成 | 风控规则配置、风险结果中心、销项/进项/代垫/海关/红冲/作废报表（占位页） |
+
+### 32.2 技术实现与原计划差异
+
+| 项 | 原计划 | 实际实现 | 原因 |
+|----|--------|----------|------|
+| 数据库 | PostgreSQL | **SQLite** (dev.db) | 原型阶段简化部署 |
+| 枚举/JSON | Prisma enum + Json | **String** + 默认值 | SQLite 不支持 |
+| 鉴权 | RBAC + 数据权限 | **Mock Credentials** (11 角色) | 原型阶段 |
+| 中间件 | Next.js middleware | **无** | Turbopack edge runtime 冲突 |
+| 状态管理 | Zustand | **TanStack Query + useState** | 简化 |
+| 表格 | — | TanStack Table + **列拖拽排序/置顶/显隐** | 客户端列管理 |
+| 审批流 | RBAC 审批 | **多级审批引擎** + 批量审批 | 4 工作流定义 |
+| UI 语言 | 中英混合 | **全中文** | StatusBadge/币种/票种/状态全部中文化 |
+| 删除操作 | 直接删除 | **ConfirmDialog 二次确认** | 15 个 CRUD 页面全覆盖 |
+| 编辑方式 | Dialog 弹窗 | **全页面编辑**（业务订单/开票申请/进项发票） | 字段更完整、体验更好 |
+
+### 32.3 种子数据覆盖
+
+| 表 | 条数 | 说明 |
+|----|------|------|
+| Organization | 1 | 深圳半导体供应链有限公司 |
+| User | 11 | 11 个角色全覆盖 |
+| Customer | 5 | 华为/中芯国际/长鑫存储/华虹半导体/长江存储（含完整地址、银行、联系人） |
+| Supplier | 5 | 顺丰/京东物流/中外运报关/中国外运/报关协会 |
+| BusinessOrder | 5 | 含金额汇总、多币种(CNY+USD)、不同状态 |
+| RevenueOrder | 12 | 每业务订单 2-3 条 |
+| FeeItem | 15 | 关务/仓储/运输/代理各类费用 |
+| AdvancePayment | 5 | 含 USD 多币种、不同收款/核销状态 |
+| CustomsPaymentBook | 3 | 关税+进口增值税 |
+| Settlement | 15 | 按季度、多客户 |
+| OutputInvoiceApplication | 5 | DRAFT→PENDING_APPROVAL→ISSUED，含明细行 |
+| OutputInvoice | 3 | 含发票号码/交付/查验状态 |
+| InputInvoice | 5 | 含明细行 |
+| RedFlushApplication | 2 | 全额+部分 |
+| VoidApplication | 2 | 申请取消+旧票作废 |
+| RiskResult | 3 | 低/中/高风险 |
+| WorkflowDefinition | 4 | APPLICATION/RED_FLUSH/VOID/ADVANCE |
+| WorkflowInstance | 2 | 含审批记录 |
+
+### 32.4 语义层
+
+| 文件 | 规模 | 说明 |
+|------|------|------|
+| `entities.json` | 22 实体 | 发票类/财务类/关务类/基础资料/业务类/风控类/审批类/归档类 |
+| `relationships.json` | 22 关系 | 三锚点 + 全部业务管线 |
+| `metrics.json` | 10 指标 | 开票总额/可开票余额/代垫收回率/进项认证率/红冲率/审批耗时等 |
+| `index.ts` | 3 查询函数 | `findEntity()` / `findMetric()` / `getRelations()` |
+
+### 32.5 页面清单（25 页）
+
+| 分组 | 页面 | 编辑方式 | 详情页 | 删除确认 | 列设置 |
+|------|------|----------|--------|----------|--------|
+| 概览 | 工作台 /dashboard | — | — | — | — |
+| 概览 | 审批中心 /approvals | Dialog 审批 | — | — | ✅ |
+| 业务管理 | 业务订单 /business-orders | 全页面编辑 | ✅ | ✅ | ✅ |
+| 业务管理 | 收入订单 /revenue-orders | Dialog + Select | — | ✅ | ✅ |
+| 业务管理 | 费用管理 /fee-items | Dialog + 自动计算 | — | ✅ | ✅ |
+| 业务管理 | 客户结算 /customer-settlements | Dialog + Select | — | ✅ | ✅ |
+| 业务管理 | 销项发票 /invoices | — | ✅ | — | ✅ |
+| 业务管理 | 开票申请 /applications | 全页面编辑 | ✅ | — | ✅ |
+| 代垫关务 | 代垫管理 /advance-payments | Dialog + Select | — | ✅ | ✅ |
+| 代垫关务 | 海关票据 /customs-payment-books | Dialog | — | ✅ | ✅ |
+| 红冲作废 | 红冲管理 /red-flush | Dialog | — | ✅ | ✅ |
+| 红冲作废 | 作废管理 /void-applications | Dialog | — | ✅ | ✅ |
+| 进项归档 | 进项发票 /input-invoices | 全页面编辑 | — | ✅ | ✅ |
+| 进项归档 | OCR 上传 /input-invoices/ocr | 全页拖拽 | — | — | — |
+| 进项归档 | 付款申请 /payment-applications | Dialog | — | — | ✅ |
+| 进项归档 | 电子档案 /archive-records | — | — | — | ✅ |
+| 基础资料 | 客户管理 /customers | Dialog (11 字段) | — | ✅ | ✅ |
+| 基础资料 | 供应商管理 /suppliers | Dialog (8 字段) | — | ✅ | ✅ |
+| 基础资料 | 公司主体 /organizations | Dialog | — | ✅ | ✅ |
+| 基础资料 | 税号管理 /tax-subjects | Dialog | — | ✅ | ✅ |
+| 基础资料 | 服务项目 /invoice-items | Dialog | — | ✅ | ✅ |
+| 基础资料 | 税收编码 /tax-codes | Dialog | — | ✅ | ✅ |
+| 风控报表 | 风控中心 /risk-results | — | — | — | ✅ |
+| 风控报表 | 报表分析 /reports | 占位 | — | — | — |
+
+### 32.6 UI 中文化覆盖
+
+| 类别 | 涉及文件 | 示例 |
+|------|---------|------|
+| 状态标签 | 15 页 | APPROVED→已通过、COLLECTED→已收款、DRAFT→草稿 |
+| 币种 | 6 页 | CNY→人民币、USD→美元、HKD→港币 |
+| 发票类别 | 3 页 | DIGITAL_SPECIAL→数电专票、VAT_SPECIAL→增值税专票 |
+| 费用类型 | 5 页 | CUSTOMS_DUTY→关税、IMPORT_VAT→进口增值税 |
+| 录入方式 | 3 页 | MANUAL→手工录入、OCR→OCR 识别 |
+| 风险等级 | 1 页 | LOW→低风险、CRITICAL→严重风险 |
+| 审批状态 | 1 页 | IN_PROGRESS→审批中、REJECTED→已驳回 |
+| 按钮文本 | 全部 | Play▶→开票、Eye👁→查看、Pencil✏→编辑 |
+
+### 32.7 v1.1 新增功能
+
+- **销项发票详情页** `/invoices/[id]`：发票信息+金额+状态+明细+时间
+- **开票申请全页面编辑** `/applications/[id]/edit`：Card 分区布局+动态明细行
+- **进项发票全页面编辑** `/input-invoices/[id]/edit`：发票+金额+关联信息
+- **列设置拖拽排序**：所有 DataTable 支持拖拽/箭头/置顶/显隐
+- **删除二次确认**：15 个 CRUD 页面全部加入 ConfirmDialog
+- **全部 UI 中文化**：StatusBadge/币种/票种/状态/费用类型/录入方式/按钮
+
+### 32.8 未实现项（后续迭代）
+
+- 真实税务开票对接（金税/乐企）
+- 真实 OCR / 查验 / 认证
+- Excel 导入导出
+- 服务端分页与搜索
+- 报表页面实际数据渲染
+- middleware.ts（Turbopack 兼容问题待解决）
+- E2E 测试
+- 客户门户
+- DropdownMenu/Button 嵌套 hydration 修复（Header 组件）
+
+---
+
+## 33. 本 PRD 的核心产品结论
 
 本系统应定位为：
 

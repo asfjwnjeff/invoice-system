@@ -7,15 +7,28 @@ const ORG_ID = "org-default";
 
 type DbModel = keyof typeof db;
 
-function createService(entity: DbModel, schema: ZodSchema, searchFields: string[], extraCreateData?: Record<string, unknown>) {
-  const model = db[entity] as { findMany: (a: Record<string, unknown>) => Promise<unknown[]>; findUnique: (a: Record<string, unknown>) => Promise<unknown>; create: (a: { data: Record<string, unknown> }) => Promise<{ id: string }>; update: (a: Record<string, unknown>) => Promise<unknown>; delete: (a: Record<string, unknown>) => Promise<unknown>; count: (a: Record<string, unknown>) => Promise<number> };
+function createService(
+  entity: DbModel,
+  schema: ZodSchema,
+  searchFields: string[],
+  extraCreateData?: Record<string, unknown>,
+  include?: Record<string, boolean | object>,
+) {
+  const model = db[entity] as {
+    findMany: (a: Record<string, unknown>) => Promise<unknown[]>;
+    findUnique: (a: Record<string, unknown>) => Promise<unknown>;
+    create: (a: { data: Record<string, unknown> }) => Promise<{ id: string }>;
+    update: (a: Record<string, unknown>) => Promise<unknown>;
+    delete: (a: Record<string, unknown>) => Promise<unknown>;
+    count: (a: Record<string, unknown>) => Promise<number>;
+  };
   return {
     list: async (search?: string) => {
       const where = search && searchFields.length ? { OR: searchFields.map((f) => ({ [f]: { contains: search } })) } : {};
-      const items = await model.findMany({ where, orderBy: { createdAt: "desc" }, take: 100 });
+      const items = await model.findMany({ where, orderBy: { createdAt: "desc" }, take: 100, ...(include ? { include } : {}) });
       return { items, total: items.length };
     },
-    getById: (id: string) => model.findUnique({ where: { id } }) as Promise<unknown>,
+    getById: (id: string) => model.findUnique({ where: { id }, ...(include ? { include } : {}) }) as Promise<unknown>,
     create: async (input: unknown, userId: string) => {
       const r = validate(schema, input); if (!r.success) return r;
       const data = { ...(r.data as Record<string, unknown>), organizationId: ORG_ID, ...(extraCreateData ?? {}) };
@@ -37,7 +50,7 @@ function createService(entity: DbModel, schema: ZodSchema, searchFields: string[
   };
 }
 
-export const businessOrderService = createService("businessOrder", businessOrderSchema, ["orderNo", "title"]);
-export const feeItemService = createService("feeItem", feeItemSchema, ["name", "feeType"]);
-export const revenueOrderService = createService("revenueOrder", revenueOrderSchema, ["orderNo", "title"]);
-export const settlementService = createService("settlement", settlementSchema, ["settlementNo"]);
+export const businessOrderService = createService("businessOrder", businessOrderSchema, ["orderNo", "title"], undefined, { customer: true });
+export const feeItemService = createService("feeItem", feeItemSchema, ["description", "feeType"], undefined, { businessOrder: true });
+export const revenueOrderService = createService("revenueOrder", revenueOrderSchema, ["orderNo", "title"], undefined, { customer: true, businessOrder: true });
+export const settlementService = createService("settlement", settlementSchema, ["settlementNo", "title"], undefined, { customer: true, revenueOrder: true });

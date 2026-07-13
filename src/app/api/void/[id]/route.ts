@@ -16,3 +16,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   await db.operationLog.create({ data: { userId: session.user.id, action: 'DELETE', entityType: 'void', entityId: id } });
   return success(null);
 }
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth(); if (!session) return error('未登录', 401);
+  const { id } = await params;
+  const body = await req.json();
+  await db.voidApplication.update({ where: { id }, data: body });
+  await db.operationLog.create({ data: { userId: session.user.id, action: 'UPDATE', entityType: 'void', entityId: id } });
+  return success(null);
+}

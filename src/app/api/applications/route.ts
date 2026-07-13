@@ -17,10 +17,10 @@ export async function POST(req: NextRequest) {
 
   const app = await db.outputInvoiceApplication.create({
     data: {
-      appNo: body.appNo, sourceType: body.sourceType ?? "MANUAL", sourceId: body.sourceId ?? "", sellerOrgId: body.sellerOrgId, sellerTaxNo: body.sellerTaxNo ?? "", customerId: body.customerId ?? "", buyerName: body.buyerName, buyerTaxNo: body.buyerTaxNo, invoiceType: body.invoiceType,
+      applicationNo: body.applicationNo ?? body.appNo, sourceType: body.sourceType ?? "MANUAL", sourceId: body.sourceId ?? null, taxSubjectId: body.taxSubjectId ?? "default", customerId: body.customerId ?? "", buyerName: body.buyerName, buyerTaxNo: body.buyerTaxNo, invoiceCategory: body.invoiceCategory ?? body.invoiceType,
       amountWithoutTax: body.amountWithoutTax ?? 0, taxAmount: body.taxAmount ?? 0, amountWithTax: body.amountWithTax ?? 0,
       remark: body.remark, createdBy: session.user.id,
-      items: { create: (body.items ?? []).map((item: Record<string, unknown>) => ({ itemName: item.itemName as string, taxCode: (item.taxCode as string) ?? "", quantity: (item.quantity as number) ?? 1, unitPrice: (item.unitPrice as number) ?? 0, amount: (item.amount as number) ?? 0, taxRate: (item.taxRate as number) ?? 0, taxAmount: (item.taxAmount as number) ?? 0, amountWithTax: ((item.amount as number) ?? 0) + ((item.taxAmount as number) ?? 0) })) },
+      items: { create: (body.items ?? []).map((item: Record<string, unknown>) => ({ itemName: item.itemName as string, taxClassificationCode: (item.taxCode as string) ?? "", quantity: (item.quantity as number) ?? 1, unitPrice: (item.unitPrice as number) ?? 0, amount: (item.amount as number) ?? 0, taxRate: (item.taxRate as number) ?? 0, taxAmount: (item.taxAmount as number) ?? 0, totalAmount: ((item.amount as number) ?? 0) + ((item.taxAmount as number) ?? 0) })) },
     },
     include: { items: true },
   });

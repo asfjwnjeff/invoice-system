@@ -12,23 +12,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 interface T { id: string; appNo: string; voidCategory: string; voidReason: string; targetType: string; status: string; }
 
 export default function Page() {
   const qc = useQueryClient(); const [open, setOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [f, setF] = useState({ appNo:"VOID-"+Date.now(), targetType:"INVOICE", targetId:"", voidCategory:"LEGACY_INVOICE_VOID", voidReason:"AMOUNT_ERROR", reasonDetail:"" });
   const { data } = useQuery({ queryKey:["void"], queryFn: async () => { const r = await fetch("/api/void"); return (await r.json()).data as { items: T[] }; } });
   const sm = useMutation({ mutationFn: async () => { const r = await fetch("/api/void", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(f) }); return r.json(); }, onSuccess: (r) => { if (r.success) { toast.success("已创建"); setOpen(false); qc.invalidateQueries({ queryKey:["void"] }); } else toast.error(r.error??"失败"); } });
   const dm = useMutation({ mutationFn: (id: string) => fetch(`/api/void/${id}`, { method:"DELETE" }), onSuccess: () => { toast.success("已删除"); qc.invalidateQueries({ queryKey:["void"] }); } });
-  const sv = (s: string): "success"|"warning"|"danger"|"neutral" => s==="EXECUTED"?"success":s==="REJECTED"?"danger":"warning";
+  const voidStatusLabels: Record<string, string> = { DRAFT: "草稿", APPROVED: "已审批", REJECTED: "已驳回", EXECUTED: "已执行" };
+const voidCategoryLabels: Record<string, string> = { APPLICATION_CANCEL: "开票申请取消", LEGACY_INVOICE_VOID: "传统票据作废", AGENCY_INVOICE_VOID: "代开发票作废" };
+const voidReasonLabels: Record<string, string> = { AMOUNT_ERROR: "金额错误", TAX_RATE_ERROR: "税率错误", BUYER_INFO_ERROR: "抬头错误", DUPLICATE_ISSUE: "重复开票", OTHER: "其他" };
+const targetTypeLabels: Record<string, string> = { INVOICE: "发票", APPLICATION: "开票申请" };
+const sv = (s: string): "success"|"warning"|"danger"|"neutral" => s==="EXECUTED"?"success":s==="REJECTED"?"danger":"warning";
   const cols: ColumnDef<T>[] = [
     { accessorKey:"appNo", header:"作废单号", cell:({ row }) => <span className="font-medium tabular-nums">{row.original.appNo}</span> },
-    { accessorKey:"voidCategory", header:"作废类别" },
-    { accessorKey:"voidReason", header:"原因" },
-    { accessorKey:"targetType", header:"目标类型" },
-    { accessorKey:"status", header:"状态", cell:({ row }) => <StatusBadge status={row.original.status} variant={sv(row.original.status)} /> },
-    { id:"act", header:"操作", cell:({ row }) => <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => dm.mutate(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button> },
+    { accessorKey:"voidCategory", header:"作废类别", cell:({ row }) => voidCategoryLabels[row.original.voidCategory] ?? row.original.voidCategory },
+    { accessorKey:"voidReason", header:"原因", cell:({ row }) => voidReasonLabels[row.original.voidReason] ?? row.original.voidReason },
+    { accessorKey:"targetType", header:"目标类型", cell:({ row }) => targetTypeLabels[row.original.targetType] ?? row.original.targetType },
+    { accessorKey:"status", header:"状态", cell:({ row }) => <StatusBadge status={voidStatusLabels[row.original.status] ?? row.original.status} variant={sv(row.original.status)} /> },
+    { id:"act", header:"操作", cell:({ row }) => <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button> },
   ];
   return (
     <div>
@@ -45,6 +51,16 @@ export default function Page() {
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>取消</Button><Button onClick={() => sm.mutate()}>{sm.isPending ? "提交中..." : "提交"}</Button></DialogFooter>
       </DialogContent></Dialog>
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={() => setDeleteId(null)}
+        title="确认删除"
+        description="确认要删除吗？此操作不可撤销。"
+        confirmLabel="删除"
+        variant="danger"
+        loading={dm.isPending}
+        onConfirm={() => deleteId && dm.mutate(deleteId)}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
@@ -13,12 +14,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 interface T { id: string; taxBillNo: string; customsDeclNo: string; type: string; taxType: string; taxAmount: number; isAdvance: boolean; paymentDate: string; }
 const E = "customs-payment-books";
+const customsTypeLabels: Record<string, string> = { IMPORT_VAT_PAYMENT: "进口增值税", CUSTOMS_DUTY_PAYMENT: "关税", OTHER_TAX: "其他" };
+const taxTypeLabels: Record<string, string> = { CUSTOMS_DUTY: "关税", IMPORT_VAT: "进口增值税", OTHER: "其他" };
 
 export default function Page() {
   const qc = useQueryClient(); const [open, setOpen] = useState(false); const [editId, setEditId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [f, setF] = useState({ taxBillNo: "", customsDeclNo: "", type: "IMPORT_VAT_PAYMENT", taxType: "IMPORT_VAT", taxAmount: 0, paymentDate: new Date().toISOString().slice(0,10), taxpayer: "", isAdvance: false });
   const { data } = useQuery({ queryKey: [E], queryFn: async () => { const r = await fetch(`/api/${E}`); return (await r.json()).data as { items: T[] }; } });
   const sm = useMutation({ mutationFn: async () => { const m = editId ? "PUT" : "POST"; const u = editId ? `/api/${E}/${editId}` : `/api/${E}`; const r = await fetch(u, { method: m, headers:{"Content-Type":"application/json"}, body: JSON.stringify(f) }); return r.json(); }, onSuccess: (r) => { if (r.success) { toast.success(editId?"已更新":"已创建"); setOpen(false); reset(); qc.invalidateQueries({ queryKey:[E] }); } else toast.error(r.error ?? "失败"); } });
@@ -27,12 +32,12 @@ export default function Page() {
   const cols: ColumnDef<T>[] = [
     { accessorKey: "taxBillNo", header: "税单号", cell: ({ row }) => <span className="font-medium tabular-nums">{row.original.taxBillNo}</span> },
     { accessorKey: "customsDeclNo", header: "报关单号" },
-    { accessorKey: "type", header: "票据类型" },
-    { accessorKey: "taxType", header: "税种" },
+    { accessorKey: "type", header: "票据类型", cell: ({ row }) => customsTypeLabels[row.original.type] ?? row.original.type },
+    { accessorKey: "taxType", header: "税种", cell: ({ row }) => taxTypeLabels[row.original.taxType] ?? row.original.taxType },
     { accessorKey: "taxAmount", header: "税额", cell: ({ row }) => <span className="tabular-nums">¥{row.original.taxAmount.toLocaleString()}</span> },
     { accessorKey: "isAdvance", header: "代垫", cell: ({ row }) => row.original.isAdvance ? <StatusBadge status="是" variant="warning" /> : "否" },
     { accessorKey: "paymentDate", header: "缴款日期", cell: ({ row }) => row.original.paymentDate?.slice(0,10) ?? "-" },
-    { id: "act", header: "操作", cell: ({ row }) => (<div className="flex gap-1"><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditId(row.original.id); setOpen(true); }}><Pencil className="h-3.5 w-3.5" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => dm.mutate(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button></div>) },
+    { id: "act", header: "操作", cell: ({ row }) => (<div className="flex gap-1"><Link href={`/customs-payment-books/${row.original.id}`}><Button variant="ghost" size="sm" className="h-8">查看</Button></Link><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditId(row.original.id); setOpen(true); }}><Pencil className="h-3.5 w-3.5" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button></div>) },
   ];
   return (
     <div>
@@ -51,6 +56,16 @@ export default function Page() {
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>取消</Button><Button onClick={() => sm.mutate()}>{sm.isPending ? "保存中..." : "保存"}</Button></DialogFooter>
       </DialogContent></Dialog>
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={() => setDeleteId(null)}
+        title="确认删除"
+        description="确认要删除吗？此操作不可撤销。"
+        confirmLabel="删除"
+        variant="danger"
+        loading={dm.isPending}
+        onConfirm={() => deleteId && dm.mutate(deleteId)}
+      />
     </div>
   );
 }

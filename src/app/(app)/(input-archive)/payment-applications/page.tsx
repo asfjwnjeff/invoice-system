@@ -18,12 +18,13 @@ export default function Page() {
   const [f, setF] = useState({ payAppNo:"PAY-"+Date.now(), supplierId:"", supplierName:"", invoiceIds:"", amount:0, remark:"" });
   const { data } = useQuery({ queryKey:["payment-apps"], queryFn: async () => { const r = await fetch("/api/payment-applications"); return (await r.json()).data as { items: T[] }; } });
   const sm = useMutation({ mutationFn: async () => { const r = await fetch("/api/payment-applications", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(f) }); return r.json(); }, onSuccess: (r) => { if (r.success) { toast.success("付款申请已创建"); setOpen(false); qc.invalidateQueries({queryKey:["payment-apps"]}); } else toast.error(r.error??"失败"); } });
-  const sv = (s:string):"success"|"warning"|"danger"|"neutral" => s==="PAID"?"success":s==="PENDING"?"warning":"neutral";
+  const payStatusLabels: Record<string, string> = { PAID: "已付款", PENDING: "待付款", APPROVED: "已审批", REJECTED: "已驳回" };
+const sv = (s:string):"success"|"warning"|"danger"|"neutral" => s==="PAID"?"success":s==="PENDING"?"warning":"neutral";
   const cols: ColumnDef<T>[] = [
     { accessorKey:"payAppNo", header:"申请号", cell:({row}) => <span className="font-medium">{row.original.payAppNo}</span> },
     { accessorKey:"supplierName", header:"供应商" },
     { accessorKey:"amount", header:"金额", cell:({row}) => <span className="tabular-nums">¥{row.original.amount.toLocaleString()}</span> },
-    { accessorKey:"status", header:"状态", cell:({row}) => <StatusBadge status={row.original.status} variant={sv(row.original.status)} /> },
+    { accessorKey:"status", header:"状态", cell:({row}) => <StatusBadge status={payStatusLabels[row.original.status] ?? row.original.status} variant={sv(row.original.status)} /> },
     { accessorKey:"createdAt", header:"创建时间", cell:({row}) => new Date(row.original.createdAt).toLocaleDateString("zh-CN") },
   ];
   return (

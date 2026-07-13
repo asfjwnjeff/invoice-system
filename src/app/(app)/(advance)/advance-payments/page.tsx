@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/shared/data-table";
@@ -12,15 +13,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 interface T { id: string; advanceNo: string; feeType: string; baseCurrencyAmount: number; payerType: string; status: string; collectionStatus: string; customer?: { name: string }; businessOrder?: { orderNo: string }; }
 const E = "advance-payments";
+const feeTypeLabels: Record<string, string> = { CUSTOMS_DUTY: "关税", IMPORT_VAT: "进口增值税", INSPECTION_FEE: "商检费", PORT_FEE: "港口费", INSURANCE: "保险费", EXPRESS_FEE: "快递费", CUSTOMS_SERVICE: "关务服务", WAREHOUSE_SERVICE: "仓储服务", TRANSPORT_SERVICE: "运输服务", AGENCY_SERVICE: "代理服务", OTHER_ADVANCE: "其他" };
+const collLabels: Record<string, string> = { COLLECTED: "已收款", PARTIALLY_COLLECTED: "部分收款", PENDING: "待收款" };
+const advStatusLabels: Record<string, string> = { DRAFT: "草稿", PENDING_CONFIRM: "待确认", CONFIRMED: "已确认" };
 
 const feeTypes = ["CUSTOMS_DUTY","IMPORT_VAT","INSPECTION_FEE","PORT_FEE","INSURANCE","EXPRESS_FEE","OTHER_ADVANCE"];
 const statusV = (s: string): "success"|"warning"|"danger"|"neutral" => s === "COLLECTED"||s==="WRITTEN_OFF" ? "success" : s === "DRAFT"||s==="PENDING_CONFIRM" ? "neutral" : "warning";
 
 export default function Page() {
   const qc = useQueryClient(); const [open, setOpen] = useState(false); const [editId, setEditId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [f, setF] = useState({ advanceNo: "ADV-"+Date.now(), customerId: "", businessOrderId: "", feeType: "CUSTOMS_DUTY", occurredDate: new Date().toISOString().slice(0,10), currency: "CNY", originalAmount: 0, exchangeRate: 1, baseCurrencyAmount: 0, payerType: "COMPANY", invoiceStrategy: "NO_INVOICE", remark: "" });
   const { data } = useQuery({ queryKey: [E], queryFn: async () => { const r = await fetch(`/api/${E}`); return (await r.json()).data as { items: T[] }; } });
   const sm = useMutation({ mutationFn: async () => { const m = editId ? "PUT" : "POST"; const u = editId ? `/api/${E}/${editId}` : `/api/${E}`; const r = await fetch(u, { method: m, headers: { "Content-Type":"application/json" }, body: JSON.stringify(f) }); return r.json(); }, onSuccess: (r) => { if (r.success) { toast.success(editId?"已更新":"已创建"); setOpen(false); reset(); qc.invalidateQueries({ queryKey: [E] }); } else toast.error(r.error ?? "失败"); } });
@@ -29,11 +35,12 @@ export default function Page() {
   const cols: ColumnDef<T>[] = [
     { accessorKey: "advanceNo", header: "代垫单号", cell: ({ row }) => <span className="font-medium tabular-nums">{row.original.advanceNo}</span> },
     { accessorKey: "customer.name", header: "客户", cell: ({ row }) => row.original.customer?.name || "-" },
-    { accessorKey: "feeType", header: "费用类型" },
+    { accessorKey: "businessOrder.orderNo", header: "关联订单", cell: ({ row }) => row.original.businessOrder?.orderNo || "-" },
+    { accessorKey: "feeType", header: "费用类型", cell: ({ row }) => feeTypeLabels[row.original.feeType] ?? row.original.feeType },
     { accessorKey: "baseCurrencyAmount", header: "金额", cell: ({ row }) => <span className="tabular-nums">¥{row.original.baseCurrencyAmount.toLocaleString()}</span> },
-    { accessorKey: "collectionStatus", header: "收款状态", cell: ({ row }) => <StatusBadge status={row.original.collectionStatus} variant={row.original.collectionStatus==="COLLECTED"?"success":"warning"} /> },
-    { accessorKey: "status", header: "状态", cell: ({ row }) => <StatusBadge status={row.original.status} variant={statusV(row.original.status)} /> },
-    { id: "act", header: "操作", cell: ({ row }) => (<div className="flex gap-1"><Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditId(row.original.id); setOpen(true); }}><Pencil className="h-3.5 w-3.5" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => dm.mutate(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button></div>) },
+    { accessorKey: "collectionStatus", header: "收款状态", cell: ({ row }) => <StatusBadge status={collLabels[row.original.collectionStatus] ?? row.original.collectionStatus} variant={row.original.collectionStatus==="COLLECTED"?"success":"warning"} /> },
+    { accessorKey: "status", header: "状态", cell: ({ row }) => <StatusBadge status={advStatusLabels[row.original.status] ?? row.original.status} variant={statusV(row.original.status)} /> },
+    { id: "act", header: "操作", cell: ({ row }) => (<div className="flex gap-1"><Link href={`/advance-payments/${row.original.id}`}><Button variant="ghost" size="sm" className="h-8">查看</Button></Link><Button variant="ghost" size="icon" className="h-8 w-8" asChild><Pencil className="h-3.5 w-3.5" /></Button><Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button></div>) },
   ];
   return (
     <div>
@@ -61,6 +68,16 @@ export default function Page() {
         </div>
         <DialogFooter><Button variant="outline" onClick={() => setOpen(false)}>取消</Button><Button onClick={() => sm.mutate()}>{sm.isPending ? "保存中..." : "保存"}</Button></DialogFooter>
       </DialogContent></Dialog>
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={() => setDeleteId(null)}
+        title="确认删除"
+        description="确认要删除吗？此操作不可撤销。"
+        confirmLabel="删除"
+        variant="danger"
+        loading={dm.isPending}
+        onConfirm={() => deleteId && dm.mutate(deleteId)}
+      />
     </div>
   );
 }

@@ -5,15 +5,20 @@ import type { ZodSchema } from "zod";
 
 const ORG_ID = "org-default";
 
-function crudService(entity: "advancePayment"|"customsPaymentBook", schema: ZodSchema, searchFields: string[]) {
+function crudService(
+  entity: "advancePayment"|"customsPaymentBook",
+  schema: ZodSchema,
+  searchFields: string[],
+  include?: Record<string, boolean | object>,
+) {
   const model = db[entity];
   return {
     list: async (search?: string) => {
       const where = search ? { OR: searchFields.map(f => ({ [f]: { contains: search } })) } : {};
-      const items = await (model as { findMany: (a: Record<string, unknown>) => unknown }).findMany({ where, orderBy: { createdAt: "desc" }, take: 100 });
+      const items = await (model as { findMany: (a: Record<string, unknown>) => unknown }).findMany({ where, orderBy: { createdAt: "desc" }, take: 100, ...(include ? { include } : {}) });
       return { items, total: (items as unknown[]).length };
     },
-    getById: (id: string) => (model as { findUnique: (a: Record<string, unknown>) => unknown }).findUnique({ where: { id } }),
+    getById: (id: string) => (model as { findUnique: (a: Record<string, unknown>) => unknown }).findUnique({ where: { id }, ...(include ? { include } : {}) }),
     create: async (input: unknown, userId: string) => {
       const r = validate(schema, input); if (!r.success) return r;
       const data = { ...(r.data as Record<string, unknown>), organizationId: ORG_ID, createdBy: userId };
@@ -35,5 +40,5 @@ function crudService(entity: "advancePayment"|"customsPaymentBook", schema: ZodS
   };
 }
 
-export const advancePaymentService = crudService("advancePayment", advancePaymentSchema, ["advanceNo", "feeType"]);
-export const customsPaymentBookService = crudService("customsPaymentBook", customsPaymentBookSchema, ["taxBillNo", "customsDeclNo"]);
+export const advancePaymentService = crudService("advancePayment", advancePaymentSchema, ["advanceNo", "feeType"], { customer: true, businessOrder: true });
+export const customsPaymentBookService = crudService("customsPaymentBook", customsPaymentBookSchema, ["bookNo", "customsDeclarationNo"]);

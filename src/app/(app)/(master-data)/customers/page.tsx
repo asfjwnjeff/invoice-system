@@ -16,9 +16,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface Customer { id: string; name: string; taxNo: string | null; contactPerson: string | null; contactPhone: string | null; contactEmail: string | null; invoiceStrategy: string; isBlacklisted: boolean; }
+interface Customer { id: string; name: string; shortName: string | null; taxNo: string | null; address: string | null; contactPerson: string | null; contactPhone: string | null; contactEmail: string | null; invoiceStrategy: string; isBlacklisted: boolean; }
 
-const emptyForm = { name: "", taxNo: "", contactPerson: "", contactPhone: "", contactEmail: "", invoiceStrategy: "NO_INVOICE", isBlacklisted: false };
+const invoiceStrategyLabels: Record<string, string> = {
+  NO_INVOICE: "不开票",
+  SEPARATE_INVOICE: "代垫单独开票",
+  MERGE_WITH_SERVICE: "与服务费合并",
+  SERVICE_ONLY: "仅服务费",
+  NET_AMOUNT: "差额开票",
+  MANUAL: "手工指定",
+};
+
+const emptyForm = { name: "", shortName: "", taxNo: "", address: "", contactPerson: "", contactPhone: "", contactEmail: "", invoiceStrategy: "NO_INVOICE", isBlacklisted: false };
 
 export default function CustomersPage() {
   const qc = useQueryClient();
@@ -53,15 +62,19 @@ export default function CustomersPage() {
 
   const openEdit = (c: Customer) => {
     setEditingId(c.id);
-    setForm({ name: c.name, taxNo: c.taxNo ?? "", contactPerson: c.contactPerson ?? "", contactPhone: c.contactPhone ?? "", contactEmail: c.contactEmail ?? "", invoiceStrategy: c.invoiceStrategy, isBlacklisted: c.isBlacklisted });
+    setForm({ name: c.name, shortName: c.shortName ?? "", taxNo: c.taxNo ?? "", address: c.address ?? "", contactPerson: c.contactPerson ?? "", contactPhone: c.contactPhone ?? "", contactEmail: c.contactEmail ?? "", invoiceStrategy: c.invoiceStrategy, isBlacklisted: c.isBlacklisted });
     setDialogOpen(true);
   };
 
   const columns: ColumnDef<Customer>[] = [
     { accessorKey: "name", header: "客户名称", cell: ({ row }) => <span className="font-medium">{row.original.name}</span> },
+    { accessorKey: "shortName", header: "简称", cell: ({ row }) => row.original.shortName || "-" },
     { accessorKey: "taxNo", header: "税号", cell: ({ row }) => row.original.taxNo || "-" },
+    { accessorKey: "address", header: "地址", cell: ({ row }) => row.original.address || "-" },
     { accessorKey: "contactPerson", header: "联系人", cell: ({ row }) => row.original.contactPerson || "-" },
     { accessorKey: "contactPhone", header: "电话", cell: ({ row }) => row.original.contactPhone || "-" },
+    { accessorKey: "contactEmail", header: "邮箱", cell: ({ row }) => row.original.contactEmail || "-" },
+    { accessorKey: "invoiceStrategy", header: "开票策略", cell: ({ row }) => invoiceStrategyLabels[row.original.invoiceStrategy] ?? row.original.invoiceStrategy },
     { accessorKey: "isBlacklisted", header: "状态", cell: ({ row }) => row.original.isBlacklisted ? <StatusBadge status="黑名单" variant="danger" /> : <StatusBadge status="正常" variant="success" /> },
     { id: "actions", header: "操作", cell: ({ row }) => (
       <div className="flex gap-1">
@@ -81,7 +94,9 @@ export default function CustomersPage() {
           <DialogHeader><DialogTitle>{editingId ? "编辑客户" : "新增客户"}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="col-span-2 space-y-2"><Label>客户名称 *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div className="space-y-2"><Label>简称</Label><Input value={form.shortName} onChange={(e) => setForm({ ...form, shortName: e.target.value })} /></div>
             <div className="space-y-2"><Label>税号</Label><Input value={form.taxNo} onChange={(e) => setForm({ ...form, taxNo: e.target.value })} /></div>
+            <div className="col-span-2 space-y-2"><Label>地址</Label><Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></div>
             <div className="space-y-2"><Label>联系人</Label><Input value={form.contactPerson} onChange={(e) => setForm({ ...form, contactPerson: e.target.value })} /></div>
             <div className="space-y-2"><Label>电话</Label><Input value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></div>
             <div className="space-y-2"><Label>邮箱</Label><Input value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })} /></div>
@@ -90,12 +105,12 @@ export default function CustomersPage() {
               <Select value={form.invoiceStrategy} onValueChange={(v) => setForm({ ...form, invoiceStrategy: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MANUAL">手工指定</SelectItem>
+                  <SelectItem value="NO_INVOICE">不开票</SelectItem>
                   <SelectItem value="SEPARATE_INVOICE">代垫单独开票</SelectItem>
                   <SelectItem value="MERGE_WITH_SERVICE">与服务费合并</SelectItem>
                   <SelectItem value="SERVICE_ONLY">仅服务费</SelectItem>
-                  <SelectItem value="NO_INVOICE">不开票</SelectItem>
                   <SelectItem value="NET_AMOUNT">差额开票</SelectItem>
+                  <SelectItem value="MANUAL">手工指定</SelectItem>
                 </SelectContent>
               </Select>
             </div>
