@@ -959,7 +959,7 @@ async function main() {
         headerValidationMessage: iinv.hdrMsg,
         deductSelectionStatus: iinv.deductSel,
         nonDeductReason: iinv.nonDeductRsn,
-        voucherDate: d(iinv.voucherDt),
+        voucherDate: iinv.voucherDt ? d(iinv.voucherDt) : null,
         voucherNo: iinv.voucherNo,
         deductibleAmount: iinv.deductAmt ? money(iinv.deductAmt) : null,
         items: {
