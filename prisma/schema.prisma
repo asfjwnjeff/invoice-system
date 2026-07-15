@@ -71,6 +71,8 @@ model TaxSubject {
 
   outputInvoiceApplications OutputInvoiceApplication[]
   outputInvoices            OutputInvoice[]
+  preInvoices               PreInvoice[]
+  bankAccounts              TaxSubjectBankAccount[]
 
   @@map("tax_subjects")
 }
@@ -103,6 +105,7 @@ model Customer {
   outputInvoiceApplications OutputInvoiceApplication[]
   settlements              Settlement[]
   inputInvoices            InputInvoice[]
+  preInvoices              PreInvoice[]
 
   @@map("customers")
 }
@@ -130,6 +133,7 @@ model Supplier {
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
   inputInvoices InputInvoice[]
+  costEntries   CostEntry[]
 
   @@map("suppliers")
 }
@@ -152,6 +156,7 @@ model InvoiceItem {
   outputInvoiceApplicationItems OutputInvoiceApplicationItem[]
   outputInvoiceItems            OutputInvoiceItem[]
   inputInvoiceItems             InputInvoiceItem[]
+  preInvoiceItems               PreInvoiceItem[]
 
   @@map("invoice_items")
 }
@@ -168,6 +173,7 @@ model TaxCode {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   invoiceItems InvoiceItem[]
+  preInvoiceItems PreInvoiceItem[]
 
   @@map("tax_codes")
 }
@@ -200,6 +206,7 @@ model BusinessOrder {
   revenueOrders    RevenueOrder[]
   inputInvoices    InputInvoice[]
   feeItems         FeeItem[]
+  costEntries      CostEntry[]
 
   @@map("business_orders")
 }
@@ -247,6 +254,7 @@ model CostCenter {
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
   inputInvoices InputInvoice[]
+  costEntries   CostEntry[]
 
   @@map("cost_centers")
 }
@@ -398,11 +406,15 @@ model OutputInvoiceApplication {
   createdBy         String?     @map("created_by")
   creator           User?       @relation("CreatedByUser", fields: [createdBy], references: [id])
   approvedBy        String?     @map("approved_by")
+  cashierName       String?     @map("cashier_name")
+  reviewerName      String?     @map("reviewer_name")
+  drawerName        String?     @map("drawer_name")
   createdAt         DateTime    @default(now()) @map("created_at")
   updatedAt         DateTime    @updatedAt @map("updated_at")
 
   items              OutputInvoiceApplicationItem[]
   outputInvoice      OutputInvoice?
+  preInvoices        PreInvoice[]
 
   @@map("output_invoice_applications")
 }
@@ -479,6 +491,9 @@ model OutputInvoice {
   headerValidationMessage String?            @map("header_validation_message")
   usageStatus           String              @default("UNUSED") @map("usage_status")
   pushStatus            String              @default("PENDING") @map("push_status")
+  pushToCBMSStatus      String              @default("PENDING") @map("push_to_cbms_status")
+  emailDeliveryStatus   String              @default("PENDING") @map("email_delivery_status")
+  emailSentAt           DateTime?           @map("email_sent_at")
   entryMethod           String              @default("MANUAL") @map("entry_method")
   recordedBy            String?            @map("recorded_by")
   uploadFilename        String?            @map("upload_filename")
@@ -492,6 +507,7 @@ model OutputInvoice {
   deliveryRecords    InvoiceDeliveryRecord[]
   verifyRecords      InvoiceVerifyRecord[]
   invoiceFiles       InvoiceFile[]
+  preInvoice         PreInvoice?
 
   @@map("output_invoices")
 }
@@ -663,6 +679,8 @@ model RedFlushApplication {
   confirmationForm    RedConfirmationForm? @relation("RedFlushConfirmationForm", fields: [confirmationFormId], references: [id])
   redInvoiceNo        String?         @map("red_invoice_no")
   reissueDraftId      String?         @map("reissue_draft_id")
+  verifyCheckStatus   String?         @map("verify_check_status")
+  bizStatusCheck      String?         @map("biz_status_check")
   attachments         String            @default("[]")
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
@@ -862,4 +880,114 @@ model ApprovalRecord {
   comment     String?
   createdAt   DateTime @default(now()) @map("created_at")
   @@map("approval_records")
+}
+
+model PreInvoice {
+  id                String        @id @default(cuid())
+  preInvoiceNo      String        @unique @map("pre_invoice_no")
+  sourceType        String        @default("APPLICATION") @map("source_type")
+  applicationId     String?       @unique @map("application_id")
+  application       OutputInvoiceApplication? @relation(fields: [applicationId], references: [id])
+  taxSubjectId      String        @map("tax_subject_id")
+  taxSubject        TaxSubject    @relation(fields: [taxSubjectId], references: [id])
+  customerId        String        @map("customer_id")
+  customer          Customer      @relation(fields: [customerId], references: [id])
+  buyerName         String        @map("buyer_name")
+  buyerTaxNo        String?       @map("buyer_tax_no")
+  buyerAddress      String?       @map("buyer_address")
+  buyerPhone        String?       @map("buyer_phone")
+  buyerBankName     String?       @map("buyer_bank_name")
+  buyerBankAccount  String?       @map("buyer_bank_account")
+  sellerName        String        @default("") @map("seller_name")
+  sellerTaxNo       String?       @map("seller_tax_no")
+  invoiceCategory   String        @map("invoice_category")
+  amountWithoutTax  Decimal       @default(0) @map("amount_without_tax")
+  taxAmount         Decimal       @default(0) @map("tax_amount")
+  amountWithTax     Decimal       @default(0) @map("amount_with_tax")
+  currency          String        @default("CNY")
+  remark            String?
+  reviewStatus      String        @default("DRAFT") @map("review_status")
+  firstReviewComment  String?     @map("first_review_comment")
+  firstReviewedAt     DateTime?   @map("first_reviewed_at")
+  secondReviewComment String?     @map("second_review_comment")
+  secondReviewedAt    DateTime?   @map("second_reviewed_at")
+  taxPushStatus     String        @default("PENDING") @map("tax_push_status")
+  taxPushAt         DateTime?     @map("tax_push_at")
+  taxResponseData   String?       @map("tax_response_data")
+  outputInvoiceId   String?       @unique @map("output_invoice_id")
+  outputInvoice     OutputInvoice? @relation(fields: [outputInvoiceId], references: [id])
+  deliveryStatus    String        @default("PENDING") @map("delivery_status")
+  attachments       String        @default("[]")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  items PreInvoiceItem[]
+
+  @@map("pre_invoices")
+}
+
+model PreInvoiceItem {
+  id                    String      @id @default(cuid())
+  preInvoiceId          String      @map("pre_invoice_id")
+  preInvoice            PreInvoice  @relation(fields: [preInvoiceId], references: [id], onDelete: Cascade)
+  appItemId             String?     @map("app_item_id")
+  itemName              String      @map("item_name")
+  taxClassificationCode String?     @map("tax_classification_code")
+  invoiceItemId         String?     @map("invoice_item_id")
+  invoiceItem           InvoiceItem? @relation(fields: [invoiceItemId], references: [id])
+  taxCodeId             String?     @map("tax_code_id")
+  taxCode               TaxCode?    @relation(fields: [taxCodeId], references: [id])
+  spec                  String?
+  unit                  String?
+  quantity              Decimal     @default(1)
+  unitPrice             Decimal     @default(0) @map("unit_price")
+  amount                Decimal     @default(0)
+  taxRate               Decimal     @default(0) @map("tax_rate")
+  taxAmount             Decimal     @default(0) @map("tax_amount")
+  totalAmount           Decimal     @default(0) @map("total_amount")
+  feeType               String?     @map("fee_type")
+  sortOrder             Int         @default(0) @map("sort_order")
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
+
+  @@map("pre_invoice_items")
+}
+
+model TaxSubjectBankAccount {
+  id           String     @id @default(cuid())
+  taxSubjectId String     @map("tax_subject_id")
+  taxSubject   TaxSubject @relation(fields: [taxSubjectId], references: [id])
+  bankName     String     @map("bank_name")
+  bankAccount  String     @map("bank_account")
+  isDefault    Boolean    @default(false) @map("is_default")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@map("tax_subject_bank_accounts")
+}
+
+model CostEntry {
+  id               String        @id @default(cuid())
+  entryNo          String        @unique @map("entry_no")
+  businessOrderId  String        @map("business_order_id")
+  businessOrder    BusinessOrder @relation(fields: [businessOrderId], references: [id])
+  supplierId       String?       @map("supplier_id")
+  supplier         Supplier?     @relation(fields: [supplierId], references: [id])
+  costCenterId     String?       @map("cost_center_id")
+  costCenter       CostCenter?   @relation(fields: [costCenterId], references: [id])
+  costType         String?       @map("cost_type")
+  description      String?
+  amount           Decimal       @default(0)
+  currency         String        @default("CNY")
+  occurredDate     DateTime?     @map("occurred_date")
+  f01Status        String        @default("PENDING") @map("f01_status")
+  c01Status        String        @default("PENDING") @map("c01_status")
+  status           String        @default("DRAFT")
+  inputInvoiceId   String?       @map("input_invoice_id")
+  remark           String?
+  attachments      String        @default("[]")
+  createdBy        String?       @map("created_by")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@map("cost_entries")
 }

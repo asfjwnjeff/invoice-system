@@ -2,7 +2,6 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { ThemeToggle } from "./theme-toggle";
-import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
@@ -23,16 +22,14 @@ export function Header() {
       <div className="flex items-center gap-3">
         <ThemeToggle />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="gap-2">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="text-xs bg-muted">{session?.user?.name?.charAt(0) ?? "U"}</AvatarFallback>
-              </Avatar>
-              <div className="text-left hidden sm:block">
-                <p className="text-sm font-medium">{session?.user?.name}</p>
-                <p className="text-xs text-muted-foreground">{roleLabels[session?.user?.role ?? ""] ?? session?.user?.role}</p>
-              </div>
-            </Button>
+          <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted transition-colors">
+            <Avatar className="h-7 w-7">
+              <AvatarFallback className="text-xs bg-muted">{session?.user?.name?.charAt(0) ?? "U"}</AvatarFallback>
+            </Avatar>
+            <div className="text-left hidden sm:block">
+              <p className="text-sm font-medium">{session?.user?.name}</p>
+              <p className="text-xs text-muted-foreground">{roleLabels[session?.user?.role ?? ""] ?? session?.user?.role}</p>
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuLabel>

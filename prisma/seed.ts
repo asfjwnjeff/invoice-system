@@ -66,6 +66,38 @@ async function main() {
   });
   console.log("[tax] " + taxSubject.name);
 
+  // Tax subject bank accounts (multiple per tax subject)
+  const bankAccounts = [
+    { taxSubjectId: taxSubject.id, bankName: "招商银行深圳南山支行", bankAccount: "7559123456789", isDefault: true },
+    { taxSubjectId: taxSubject.id, bankName: "中国工商银行深圳分行", bankAccount: "4000023409200123456", isDefault: false },
+    { taxSubjectId: taxSubject.id, bankName: "中国银行深圳科技园支行", bankAccount: "6217002000123456789", isDefault: false },
+  ];
+  for (const ba of bankAccounts) {
+    await db.taxSubjectBankAccount.create({ data: ba });
+  }
+  console.log("[bank] " + bankAccounts.length + " bank accounts created");
+
+  // Second tax subject (上海公司)
+  const taxSubject2 = await db.taxSubject.create({
+    data: {
+      name: "上海泓明国际货运有限公司",
+      taxNo: "91310000132248358N",
+      address: "中国（上海）自由贸易试验区富特西三路77号6幢3层302室",
+      phone: "021-58661234",
+      bankName: "招商银行股份有限公司上海淮海支行",
+      bankAccount: "121902001810903",
+      organizationId: org.id,
+    },
+  });
+  const bankAccounts2 = [
+    { taxSubjectId: taxSubject2.id, bankName: "招商银行股份有限公司上海淮海支行", bankAccount: "121902001810903", isDefault: true },
+    { taxSubjectId: taxSubject2.id, bankName: "中国工商银行上海外高桥支行", bankAccount: "1001173429200654321", isDefault: false },
+  ];
+  for (const ba of bankAccounts2) {
+    await db.taxSubjectBankAccount.create({ data: ba });
+  }
+  console.log("[tax] " + taxSubject2.name + " (+2 bank accounts)");
+
   // ═══════════════════════════════════════════════════════
   // 4. CUSTOMERS (5)
   // ═══════════════════════════════════════════════════════

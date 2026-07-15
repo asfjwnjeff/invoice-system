@@ -37,6 +37,29 @@ yarn-error.log*
 # vercel
 .vercel
 
+# superpowers
+.superpowers/
+docs/superpowers/
+
+# temp/scratch files (root only)
+/_append.py
+/_gen.py
+/_write_adv.js
+/test_heredoc.txt
+/invoice_docx_tmp/
+/*.code-workspace
+/*.mmd
+/*.png
+/*.docx
+/*.doc
+
+# playwright snapshots
+*-snapshot.yml
+*-screenshot.png
+
+# sqlite
+prisma/dev.db
+
 # playwright mcp
 .playwright-mcp/
 

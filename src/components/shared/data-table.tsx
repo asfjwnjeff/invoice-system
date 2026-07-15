@@ -2,6 +2,7 @@
 
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, type SortingState, getSortedRowModel, type ColumnFiltersState, getFilteredRowModel, type VisibilityState } from "@tanstack/react-table";
 import { useState, type ReactNode, useCallback, useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,9 +19,10 @@ interface DataTableProps<TData, TValue> {
   onSelectionChange?: (ids: string[]) => void;
   batchBar?: ReactNode;
   filterBar?: ReactNode;
+  stickyRightColumns?: string[];
 }
 
-export function DataTable<TData extends { id: string }, TValue>({ columns, data, searchKey, searchPlaceholder = "搜索...", selectable, selectedIds = [], onSelectionChange, batchBar, filterBar }: DataTableProps<TData, TValue>) {
+export function DataTable<TData extends { id: string }, TValue>({ columns, data, searchKey, searchPlaceholder = "搜索...", selectable, selectedIds = [], onSelectionChange, batchBar, filterBar, stickyRightColumns = [] }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -157,7 +159,7 @@ export function DataTable<TData extends { id: string }, TValue>({ columns, data,
             </div>
           )}
         </div>
-        {selectable && selectedIds.length > 0 && batchBar && <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-1.5 text-sm"><span className="text-muted-foreground">已选 {selectedIds.length} 项</span>{batchBar}</div>}
+        {selectable && selectedIds.length > 0 && batchBar && <div className="flex items-center gap-2 rounded-md bg-blue-100 dark:bg-blue-900/40 px-3 py-1.5 text-sm border border-blue-300 dark:border-blue-800/50"><span className="text-blue-800 dark:text-blue-300 font-medium">已选 {selectedIds.length} 项</span>{batchBar}</div>}
       </div>
       {filterBar && <div className="flex items-center">{filterBar}</div>}
       <div className="rounded-md border">
@@ -167,16 +169,16 @@ export function DataTable<TData extends { id: string }, TValue>({ columns, data,
               <TableRow key={hg.id} className="hover:bg-transparent">
                 {selectable && <TableHead className="w-10 h-10"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></TableHead>}
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id} className="h-10 text-xs font-medium text-muted-foreground uppercase tracking-wider">{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                  <TableHead key={header.id} className={`h-10 text-xs font-medium text-muted-foreground uppercase tracking-wider ${stickyRightColumns.includes(header.id) ? "sticky right-0 bg-card z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]" : ""}`}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.length ? table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="h-11 hover:bg-muted/50">
+              <TableRow key={row.id} className={cn("h-11 transition-colors", selectedIds.includes(row.original.id) ? "bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/40 dark:hover:bg-blue-900/60" : "hover:bg-blue-50/60 dark:hover:bg-slate-800/60")}>
                 {selectable && <TableCell className="w-10"><Checkbox checked={selectedIds.includes(row.original.id)} onCheckedChange={() => toggleOne(row.original.id)} /></TableCell>}
-                {row.getVisibleCells().map((cell) => (<TableCell key={cell.id} className="text-sm">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>))}
+                {row.getVisibleCells().map((cell) => (<TableCell key={cell.id} className={`text-sm ${stickyRightColumns.includes(cell.column.id) ? "sticky right-0 bg-background z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]" : ""}`}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>))}
               </TableRow>
             )) : (<TableRow><TableCell colSpan={columns.length + (selectable ? 1 : 0)} className="h-24 text-center text-muted-foreground">暂无数据</TableCell></TableRow>)}
           </TableBody>
