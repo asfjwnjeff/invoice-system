@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
   if (!file) return NextResponse.json({ success: false, error: "未选择文件" }, { status: 400 });
 
   const ext = path.extname(file.name);
+  const fileType = ext.replace(".", "").toUpperCase();
   const fileName = `${randomUUID()}${ext}`;
   const uploadDir = path.join(process.cwd(), "uploads", entityType);
   await mkdir(uploadDir, { recursive: true });
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
   await writeFile(path.join(uploadDir, fileName), buffer);
 
   const record = await db.invoiceFile.create({
-    data: { entityType, entityId, fileName: file.name, filePath: path.join("uploads", entityType, fileName), fileSize: file.size, mimeType: file.type || "application/octet-stream", uploadedBy: session.user.id },
+    data: { entityType, entityId, fileName: file.name, filePath: path.join("uploads", entityType, fileName), fileType, fileSize: file.size, mimeType: file.type || "application/octet-stream", uploadedBy: session.user.id },
   });
 
   return NextResponse.json({ success: true, data: { id: record.id, fileName: record.fileName, filePath: record.filePath, fileSize: record.fileSize } });
