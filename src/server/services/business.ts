@@ -14,7 +14,7 @@ function createService(
   extraCreateData?: Record<string, unknown>,
   include?: Record<string, boolean | object>,
 ) {
-  const model = db[entity] as {
+  const model = db[entity] as unknown as {
     findMany: (a: Record<string, unknown>) => Promise<unknown[]>;
     findUnique: (a: Record<string, unknown>) => Promise<unknown>;
     create: (a: { data: Record<string, unknown> }) => Promise<{ id: string }>;
@@ -33,18 +33,18 @@ function createService(
       const r = validate(schema, input); if (!r.success) return r;
       const data = { ...(r.data as Record<string, unknown>), organizationId: ORG_ID, ...(extraCreateData ?? {}) };
       const item = await model.create({ data });
-      await db.operationLog.create({ data: { userId, action: "CREATE", entityType: entity as string, entityId: item.id } });
+      try { await db.operationLog.create({ data: { userId, action: "CREATE", entityType: entity as string, entityId: item.id } }); } catch { /* log failure should not block the API */ }
       return { success: true as const, data: item };
     },
     update: async (id: string, input: unknown, userId: string) => {
-      const r = validate(schema.partial() as ZodSchema, input); if (!r.success) return r;
+      const r = validate((schema as unknown as { partial: () => ZodSchema }).partial(), input); if (!r.success) return r;
       const item = await model.update({ where: { id }, data: r.data as Record<string, unknown> });
-      await db.operationLog.create({ data: { userId, action: "UPDATE", entityType: entity as string, entityId: id } });
+      try { await db.operationLog.create({ data: { userId, action: "UPDATE", entityType: entity as string, entityId: id } }); } catch { /* log failure should not block the API */ }
       return { success: true as const, data: item };
     },
     delete: async (id: string, userId: string) => {
       await model.delete({ where: { id } });
-      await db.operationLog.create({ data: { userId, action: "DELETE", entityType: entity as string, entityId: id } });
+      try { await db.operationLog.create({ data: { userId, action: "DELETE", entityType: entity as string, entityId: id } }); } catch { /* log failure should not block the API */ }
       return { success: true as const };
     },
   };
