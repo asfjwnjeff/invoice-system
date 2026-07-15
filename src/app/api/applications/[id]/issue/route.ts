@@ -17,7 +17,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
 
   const invoice = await db.outputInvoice.create({
     data: {
-      invoiceNo, applicationId: app.id, invoiceType: app.invoiceType,
+      invoiceNo, applicationId: app.id, invoiceCategory: app.invoiceCategory,
       sellerName: "", sellerTaxNo: app.sellerTaxNo, buyerName: app.buyerName, buyerTaxNo: app.buyerTaxNo,
       issueDate: new Date(), amountWithoutTax: app.amountWithoutTax, taxAmount: app.taxAmount, amountWithTax: app.amountWithTax,
     },
