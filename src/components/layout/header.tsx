@@ -31,7 +31,7 @@ export function Header() {
               <p className="text-xs text-muted-foreground">{roleLabels[session?.user?.role ?? ""] ?? session?.user?.role}</p>
             </div>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent className="w-48">
             <DropdownMenuLabel>
               <span>{session?.user?.name}</span>
             </DropdownMenuLabel>

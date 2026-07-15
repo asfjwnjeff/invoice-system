@@ -13,7 +13,7 @@ export function PageHeader({ title, description, actionLabel, actionHref, onActi
       </div>
       {actionLabel && (
         actionHref
-          ? <Button asChild><Link href={actionHref}><Plus className="h-4 w-4 mr-2" />{actionLabel}</Link></Button>
+          ? <Link href={actionHref}><Button><Plus className="h-4 w-4 mr-2" />{actionLabel}</Button></Link>
           : <Button onClick={onAction}><Plus className="h-4 w-4 mr-2" />{actionLabel}</Button>
       )}
     </div>

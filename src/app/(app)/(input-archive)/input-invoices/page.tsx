@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Upload, Search, FileCheck } from "lucide-react";
+import { Trash2, Upload, FileCheck } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { useEntitySelect } from "@/lib/hooks/use-entity-select";
@@ -27,7 +27,7 @@ const headerLabels: Record<string, string> = { VALIDATED: "已校验", PENDING: 
 const emLabels: Record<string, string> = { MANUAL: "手工录入", OCR: "OCR识别", IMPORT: "批量导入", TAX_AUTHORITY: "税局同步" };
 
 export default function Page() {
-  const qc = useQueryClient(); const [open, setOpen] = useState(false); const [ocrOpen, setOcrOpen] = useState(false); const [selected, setSelected] = useState<string[]>([]);
+  const qc = useQueryClient(); const [open, setOpen] = useState(false); const [selected, setSelected] = useState<string[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("");
   const { data: supplierOptions } = useEntitySelect("/api/suppliers/select");

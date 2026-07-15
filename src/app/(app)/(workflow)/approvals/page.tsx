@@ -6,12 +6,11 @@ import { DataTable } from "@/components/shared/data-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "next-auth/react";
-import { Check, X, Eye } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface Step { step: number; role: string; label: string; status: string; assigneeName: string|null; comment: string|null; timestamp: string|null; }

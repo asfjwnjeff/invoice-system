@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, Pencil, FileText, File, ExternalLink, Eye } from "lucide-react";
+import { ArrowLeft, Pencil, File, Eye } from "lucide-react";
 import { InvoicePreviewDrawer } from "@/components/shared/invoice-preview-drawer";
 import { useState } from "react";
 

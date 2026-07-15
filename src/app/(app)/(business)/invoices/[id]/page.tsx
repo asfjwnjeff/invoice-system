@@ -123,7 +123,7 @@ export default function InvoiceDetailPage() {
 
       {/* Row 4: 来源关联 + 状态 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {inv.application && (
+        {!!inv.application && (
           <Card><CardHeader className="pb-3"><CardTitle className="text-base">来源关联</CardTitle></CardHeader>
             <CardContent className="space-y-2 text-sm">
               <Field label="开票申请号" value={S((inv.application as Record<string, unknown>).applicationNo)} />
