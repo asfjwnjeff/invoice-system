@@ -73,7 +73,7 @@ export default function InvoiceDetailPage() {
             <Field label="录入方式" value={emLabels[S(inv.entryMethod)] ?? S(inv.entryMethod)} />
             <Field label="录入人" value={S(inv.recordedBy)} />
             <Field label="录入时间" value={inv.createdAt ? new Date(S(inv.createdAt)).toLocaleDateString("zh-CN") : "-"} />
-            {inv.remark && <Field label="备注" value={S(inv.remark)} />}
+            {!!inv.remark && <Field label="备注" value={S(inv.remark)} />}
           </CardContent>
         </Card>
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">金额汇总</CardTitle></CardHeader>
@@ -128,7 +128,7 @@ export default function InvoiceDetailPage() {
             <CardContent className="space-y-2 text-sm">
               <Field label="开票申请号" value={S((inv.application as Record<string, unknown>).applicationNo)} />
               <Field label="购买方" value={S((inv.application as Record<string, unknown>).buyerName)} />
-              {inv.remark && <Field label="备注" value={S(inv.remark)} />}
+              {!!inv.remark && <Field label="备注" value={S(inv.remark)} />}
             </CardContent>
           </Card>
         )}

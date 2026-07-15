@@ -93,11 +93,11 @@ export default function ApplicationDetailPage() {
 
       {/* Row 5: 备注 + 来源/时间 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {data.remark && <Card><CardHeader className="pb-3"><CardTitle className="text-base">备注</CardTitle></CardHeader><CardContent><p className="text-sm">{S(data.remark)}</p></CardContent></Card>}
+        {!!data.remark && <Card><CardHeader className="pb-3"><CardTitle className="text-base">备注</CardTitle></CardHeader><CardContent><p className="text-sm">{S(data.remark)}</p></CardContent></Card>}
         <Card><CardHeader className="pb-3"><CardTitle className="text-base">来源与时间</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             <Field label="来源类型" value={S(data.sourceType) || "手工"} />
-            {data.revenueOrder && <Field label="收入订单" value={S((data.revenueOrder as Record<string, unknown>)?.orderNo)} />}
+            {!!data.revenueOrder && <Field label="收入订单" value={S((data.revenueOrder as Record<string, unknown>)?.orderNo)} />}
             <Field label="创建时间" value={data.createdAt ? new Date(S(data.createdAt)).toLocaleString("zh-CN") : "-"} />
             <Field label="更新时间" value={data.updatedAt ? new Date(S(data.updatedAt)).toLocaleString("zh-CN") : "-"} />
           </CardContent>
