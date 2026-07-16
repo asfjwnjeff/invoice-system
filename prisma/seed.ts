@@ -582,7 +582,7 @@ async function main() {
   console.log(`[settlements] ${settlementDefs.length} settlements`);
 
   // ═══════════════════════════════════════════════════════
-  // 14. OUTPUT INVOICE APPLICATIONS (5)
+  // 14. OUTPUT INVOICE APPLICATIONS (10)
   // ═══════════════════════════════════════════════════════
   const appDefs = [
     {
@@ -633,6 +633,54 @@ async function main() {
       status: "DRAFT", delMethod: null, email: null,
       items: [{ name: "运输服务费", qty: 10, price: 2000, taxRate: 9 }],
     },
+    {
+      appNo: "APP-2026-0006", settNo: "STL-2026-0005", cust: "中芯国际",
+      buyerName: "中芯国际集成电路制造有限公司", buyerTaxNo: "91310000600000000Y",
+      buyerAddr: "上海市浦东新区张江路18号", buyerPhone: "021-50801234",
+      buyerBank: "工商银行上海张江支行", buyerBankAcct: "1001234567890123",
+      category: "DIGITAL_SPECIAL", amtWoTax: 141509.43, taxAmt: 8490.57, amtWTax: 150000,
+      status: "ISSUED", delMethod: "EMAIL", email: "li.fang@smic.com",
+      items: [{ name: "仓储服务费", qty: 6, price: 8000, taxRate: 6 }],
+    },
+    {
+      appNo: "APP-2026-0007", settNo: "STL-2026-0009", cust: "长鑫存储",
+      buyerName: "长鑫存储技术有限公司", buyerTaxNo: "91340000MA00000001",
+      buyerAddr: "安徽省合肥市经济技术开发区翠微路6号", buyerPhone: "0551-63631234",
+      buyerBank: "建设银行合肥经开区支行", buyerBankAcct: "3401234567890123",
+      category: "DIGITAL_SPECIAL", amtWoTax: 28301.89, taxAmt: 1698.11, amtWTax: 30000,
+      status: "DRAFT", delMethod: null, email: null,
+      items: [{ name: "咨询服务费", qty: 1, price: 30000, taxRate: 6 }],
+    },
+    {
+      appNo: "APP-2026-0008", settNo: "STL-2026-0011", cust: "华为",
+      buyerName: "华为技术有限公司", buyerTaxNo: "91440300100000000X",
+      buyerAddr: "深圳市龙岗区坂田华为基地", buyerPhone: "0755-28780888",
+      buyerBank: "招商银行深圳分行", buyerBankAcct: "1234567890123456",
+      category: "DIGITAL_SPECIAL", amtWoTax: 94339.62, taxAmt: 5660.38, amtWTax: 100000,
+      status: "APPROVED", delMethod: "EMAIL", email: "wang.wm@huawei.com",
+      items: [
+        { name: "关务服务费", qty: 3, price: 15000, taxRate: 6 },
+        { name: "仓储服务费", qty: 2, price: 5000, taxRate: 6 },
+      ],
+    },
+    {
+      appNo: "APP-2026-0009", settNo: "STL-2026-0013", cust: "华虹半导体",
+      buyerName: "华虹半导体有限公司", buyerTaxNo: "91310000800000000A",
+      buyerAddr: "上海市浦东新区金桥出口加工区金豫路818号", buyerPhone: "021-50181234",
+      buyerBank: "中国银行上海金桥支行", buyerBankAcct: "4538123456789012",
+      category: "VAT_SPECIAL", amtWoTax: 159292.04, taxAmt: 20707.96, amtWTax: 180000,
+      status: "REJECTED", delMethod: null, email: null,
+      items: [{ name: "代理服务费", qty: 4, price: 25000, taxRate: 13 }],
+    },
+    {
+      appNo: "APP-2026-0010", settNo: "STL-2026-0010", cust: "长江存储",
+      buyerName: "长江存储科技有限责任公司", buyerTaxNo: "91420100000000002",
+      buyerAddr: "武汉市东湖新技术开发区未来三路88号", buyerPhone: "027-81991234",
+      buyerBank: "农业银行武汉光谷支行", buyerBankAcct: "1701234567890123",
+      category: "DIGITAL_NORMAL", amtWoTax: 75471.70, taxAmt: 4528.30, amtWTax: 80000,
+      status: "PENDING_APPROVAL", delMethod: null, email: null,
+      items: [{ name: "物流方案服务费", qty: 1, price: 80000, taxRate: 6 }],
+    },
   ];
   const appIds: Record<string, string> = {};
   for (const app of appDefs) {
@@ -679,7 +727,7 @@ async function main() {
   console.log(`[applications] ${appDefs.length} output invoice applications + items`);
 
   // ═══════════════════════════════════════════════════════
-  // 15. OUTPUT INVOICES (3)
+  // 15. OUTPUT INVOICES (4)
   // ═══════════════════════════════════════════════════════
   const invDefs = [
     {
@@ -727,6 +775,22 @@ async function main() {
       issueDate: "2026-07-05", bizDate: "2026-07-01", bizDesc: "2026Q3仓储服务费",
       delStatus: "PENDING", verifyStatus: "PENDING",
       recordedBy: "李四", uploadFile: "平安发票10221016800206642607.pdf",
+      verifiedBy: null, verifyTime: null, hdrMsg: null,
+      pool: "OUTPUT", entry: "SYSTEM",
+    },
+    {
+      invNo: "24403200000000000004", invCode: "044032400104",
+      appNo: "APP-2026-0006", category: "DIGITAL_SPECIAL",
+      sellerName: "深圳半导体供应链有限公司", sellerTaxNo: "91440300MA5ABCD123",
+      sellerAddr: "深圳市宝安区西乡街道宝安大道5018号", sellerPhone: "0755-29661234",
+      sellerBank: "工商银行深圳宝安支行", sellerBankAcct: "4000123456789012",
+      buyerName: "中芯国际集成电路制造有限公司", buyerTaxNo: "91310000600000000Y",
+      buyerAddr: "上海市浦东新区张江路18号", buyerPhone: "021-50801234",
+      buyerBank: "工商银行上海张江支行", buyerBankAcct: "1001234567890123",
+      amtWoTax: 141509.43, taxAmt: 8490.57, amtWTax: 150000,
+      issueDate: "2026-07-10", bizDate: "2026-07-05", bizDesc: "2026Q2仓储服务费",
+      delStatus: "PENDING", verifyStatus: "PENDING",
+      recordedBy: "李四", uploadFile: null,
       verifiedBy: null, verifyTime: null, hdrMsg: null,
       pool: "OUTPUT", entry: "SYSTEM",
     },
