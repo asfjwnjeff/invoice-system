@@ -54,7 +54,7 @@ export function Sidebar() {
   return (
     <aside className={cn("flex flex-col border-r border-sidebar-border bg-sidebar h-screen sticky top-0 transition-all duration-200", collapsed ? "w-[60px]" : "w-[220px]")}>
       <div className="flex h-14 items-center justify-between px-4 border-b border-sidebar-border">
-        {!collapsed && <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">发票中台</span>}
+        {!collapsed && <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">发票模块</span>}
         <Button variant="ghost" size="icon" className={cn("h-7 w-7 text-sidebar-foreground hover:bg-sidebar-accent", collapsed && "mx-auto")} onClick={() => setCollapsed(!collapsed)}>
           <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
         </Button>
