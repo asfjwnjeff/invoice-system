@@ -36,7 +36,7 @@ export function FormDialog({
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 py-2">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-5 py-2">
           {children}
         </div>
 
@@ -61,8 +61,8 @@ export function FormField({
   fullWidth?: boolean;
 }) {
   return (
-    <div className={fullWidth ? "col-span-2 space-y-1.5" : "space-y-1.5"}>
-      <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+    <div className={fullWidth ? "col-span-2 space-y-2" : "space-y-2"}>
+      <label className="text-sm font-medium leading-none text-foreground/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
         {required && <span className="text-destructive mr-0.5">*</span>}
         {label}
       </label>
