@@ -9,9 +9,11 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { FilterPanel } from "@/components/shared/filter-panel";
 import { SelectSearch } from "@/components/ui/select-search";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useEntitySelect } from "@/lib/hooks/use-entity-select";
 
 interface T { id: string; applicationNo: string; buyerName: string; buyerTaxNo: string; invoiceCategory: string; amountWithoutTax: number; taxAmount: number; amountWithTax: number; status: string; sellerName: string | null; drawerName: string | null; taxSubject?: { name: string } | null; createdAt: string; }
 
@@ -27,13 +29,19 @@ export default function ApplicationsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [statusF, setStatusF] = useState("");
   const [categoryF, setCategoryF] = useState("");
-  const [applied, setApplied] = useState({ status: "", category: "" });
+  const [buyerF, setBuyerF] = useState("");
+  const [sellerF, setSellerF] = useState("");
+  const [appNoF, setAppNoF] = useState("");
+  const [applied, setApplied] = useState({ status: "", category: "", buyer: "", seller: "", appNo: "" });
   const [filterOrder, setFilterOrder] = useState<string[]>(["status", "category"]);
 
   const { data } = useQuery({
     queryKey: [E],
     queryFn: async () => { const r = await fetch(`/api/${E}`); const j = await r.json(); return j.data as { items: T[] }; },
   });
+
+  const { data: customerOptions } = useEntitySelect("/api/customers/select");
+  const { data: taxSubjectOptions } = useEntitySelect("/api/tax-subjects/select");
 
   const dm = useMutation({
     mutationFn: (id: string) => fetch(`/api/${E}/${id}`, { method: "DELETE" }),
@@ -92,6 +100,9 @@ export default function ApplicationsPage() {
   const filtered = (data?.items ?? []).filter(i => {
     if (applied.status && i.status !== Object.keys(appStatusLabels).find(k => appStatusLabels[k] === applied.status)) return false;
     if (applied.category && i.invoiceCategory !== applied.category) return false;
+    if (applied.buyer && i.buyerName !== applied.buyer) return false;
+    if (applied.seller && i.sellerName !== applied.seller) return false;
+    if (applied.appNo && !i.applicationNo.toLowerCase().includes(applied.appNo.toLowerCase())) return false;
     return true;
   });
 
@@ -135,9 +146,44 @@ export default function ApplicationsPage() {
             />
           </>
         )}
+        {filterOrder.includes("buyerName") && (
+          <>
+            <span className="text-sm text-muted-foreground">购买方</span>
+            <SelectSearch
+              value={buyerF}
+              onValueChange={v => setBuyerF(v)}
+              options={[{ value: "", label: "全部" }, ...((customerOptions ?? []) as { id: string; label: string }[]).map(o => ({ value: o.label, label: o.label }))]}
+              placeholder="全部"
+              className="w-[200px]"
+            />
+          </>
+        )}
+        {filterOrder.includes("sellerName") && (
+          <>
+            <span className="text-sm text-muted-foreground">销方</span>
+            <SelectSearch
+              value={sellerF}
+              onValueChange={v => setSellerF(v)}
+              options={[{ value: "", label: "全部" }, ...((taxSubjectOptions ?? []) as { id: string; label: string }[]).map(o => ({ value: o.label, label: o.label }))]}
+              placeholder="全部"
+              className="w-[200px]"
+            />
+          </>
+        )}
+        {filterOrder.includes("applicationNo") && (
+          <>
+            <span className="text-sm text-muted-foreground">申请号</span>
+            <Input
+              value={appNoF}
+              onChange={e => setAppNoF(e.target.value)}
+              placeholder="输入申请号..."
+              className="w-[180px] h-8"
+            />
+          </>
+        )}
         <span className="border-l border-border h-5 mx-1" />
-        <Button size="sm" className="h-8 text-xs" onClick={() => setApplied({ status: statusF, category: categoryF })}>查询</Button>
-        <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => { setStatusF(""); setCategoryF(""); setApplied({ status: "", category: "" }); }}>重置</Button>
+        <Button size="sm" className="h-8 text-xs" onClick={() => setApplied({ status: statusF, category: categoryF, buyer: buyerF, seller: sellerF, appNo: appNoF })}>查询</Button>
+        <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => { setStatusF(""); setCategoryF(""); setBuyerF(""); setSellerF(""); setAppNoF(""); setApplied({ status: "", category: "", buyer: "", seller: "", appNo: "" }); }}>重置</Button>
       </div>
 
       <DataTable
