@@ -13,18 +13,35 @@ import { ArrowLeft, Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useEntitySelect } from "@/lib/hooks/use-entity-select";
 
-const invoiceCategoryLabels: Record<string, string> = { DIGITAL_SPECIAL: "数电专票", DIGITAL_NORMAL: "数电普票", VAT_SPECIAL: "增值税专票", VAT_NORMAL: "增值税普票", E_NORMAL: "电子普票" };
-const currencyLabels: Record<string, string> = { CNY: "人民币", USD: "美元", HKD: "港币", EUR: "欧元" };
-const defaultTaxRateByCategory: Record<string, number> = { DIGITAL_SPECIAL: 6, DIGITAL_NORMAL: 6, VAT_SPECIAL: 13, VAT_NORMAL: 6, E_NORMAL: 6 };
+const invoiceCategoryLabels: Record<string, string> = {
+  DIGITAL_SPECIAL: "数电专票", DIGITAL_NORMAL: "数电普票",
+  VAT_SPECIAL: "增值税专票", VAT_NORMAL: "增值税普票", E_NORMAL: "电子普票",
+};
+const currencyLabels: Record<string, string> = {
+  CNY: "人民币", USD: "美元", HKD: "港币", JPY: "日元",
+  EUR: "欧元", AUD: "澳大利亚元", GBP: "英镑", SGD: "新加坡元",
+};
+const deliveryLabels: Record<string, string> = {
+  EMAIL: "邮件发送", DOWNLOAD: "自行下载", MANUAL: "线下交付",
+};
+const defaultTaxRateByCategory: Record<string, number> = {
+  DIGITAL_SPECIAL: 6, DIGITAL_NORMAL: 6, VAT_SPECIAL: 13, VAT_NORMAL: 6, E_NORMAL: 6,
+};
 
-interface Item { itemName: string; taxClassificationCode: string; spec: string; unit: string; quantity: number; unitPriceWithTax: number; amount: number; taxRate: number; taxAmount: number; }
-const defaultItem: Item = { itemName: "", taxClassificationCode: "", spec: "", unit: "月", quantity: 1, unitPriceWithTax: 0, amount: 0, taxRate: 6, taxAmount: 0 };
+interface Item {
+  itemName: string; taxClassificationCode: string; spec: string; unit: string;
+  quantity: number; unitPriceWithTax: number; amount: number; taxRate: number; taxAmount: number;
+}
+const defaultItem: Item = {
+  itemName: "", taxClassificationCode: "", spec: "", unit: "月",
+  quantity: 1, unitPriceWithTax: 0, amount: 0, taxRate: 6, taxAmount: 0,
+};
 
 interface FormState {
   applicationNo: string; invoiceCategory: string; taxRate: number;
   customerId: string; buyerName: string; buyerTaxNo: string; buyerAddressPhone: string; buyerBankName: string; buyerBankAccount: string;
   taxSubjectId: string; sellerName: string; sellerTaxNo: string; sellerAddressPhone: string; sellerBankName: string; sellerBankAccount: string;
-  currency: string; cashierName: string; reviewerName: string; drawerName: string; remark: string;
+  currency: string; deliveryMethod: string; cashierName: string; reviewerName: string; drawerName: string; remark: string;
   amountWithoutTax: number; taxAmount: number; amountWithTax: number;
 }
 
@@ -32,7 +49,7 @@ const emptyForm = (): FormState => ({
   applicationNo: "", invoiceCategory: "DIGITAL_SPECIAL", taxRate: 6,
   customerId: "", buyerName: "", buyerTaxNo: "", buyerAddressPhone: "", buyerBankName: "", buyerBankAccount: "",
   taxSubjectId: "", sellerName: "", sellerTaxNo: "", sellerAddressPhone: "", sellerBankName: "", sellerBankAccount: "",
-  currency: "CNY", cashierName: "", reviewerName: "", drawerName: "", remark: "",
+  currency: "CNY", deliveryMethod: "EMAIL", cashierName: "", reviewerName: "", drawerName: "", remark: "",
   amountWithoutTax: 0, taxAmount: 0, amountWithTax: 0,
 });
 
@@ -40,8 +57,10 @@ export default function ApplicationNewPage() {
   const router = useRouter();
   const { data: customersData } = useEntitySelect("/api/customers/select");
   const { data: taxSubjectsData } = useEntitySelect("/api/tax-subjects/select");
+  const { data: taxCodesData } = useEntitySelect("/api/tax-codes/select");
   const customerOptions = (customersData ?? []) as { id: string; label: string }[];
   const taxSubjectOptions = (taxSubjectsData ?? []) as { id: string; label: string }[];
+  const taxCodeOptions = (taxCodesData ?? []) as { id: string; label: string }[];
 
   const [f, setF] = useState<FormState>(emptyForm());
   const [items, setItems] = useState<Item[]>([{ ...defaultItem }]);
@@ -73,7 +92,11 @@ export default function ApplicationNewPage() {
     const j = await r.json();
     if (j.success && j.data) {
       const c = j.data as Record<string, unknown>;
-      setF(p => ({ ...p, buyerName: String(c.name ?? ""), buyerTaxNo: String(c.taxNo ?? ""), buyerAddressPhone: [String(c.address ?? ""), String(c.phone ?? "")].filter(Boolean).join(" "), buyerBankName: String(c.bankName ?? ""), buyerBankAccount: String(c.bankAccount ?? "") }));
+      setF(p => ({ ...p,
+        buyerName: String(c.name ?? ""), buyerTaxNo: String(c.taxNo ?? ""),
+        buyerAddressPhone: [String(c.address ?? ""), String(c.phone ?? "")].filter(Boolean).join(" "),
+        buyerBankName: String(c.bankName ?? ""), buyerBankAccount: String(c.bankAccount ?? ""),
+      }));
     }
   };
 
@@ -85,7 +108,10 @@ export default function ApplicationNewPage() {
     const j = await r.json();
     if (j.success && j.data) {
       const ts = j.data as Record<string, unknown>;
-      setF(p => ({ ...p, sellerName: String(ts.name ?? ""), sellerTaxNo: String(ts.taxNo ?? ""), sellerAddressPhone: [String(ts.address ?? ""), String(ts.phone ?? "")].filter(Boolean).join(" ") }));
+      setF(p => ({ ...p,
+        sellerName: String(ts.name ?? ""), sellerTaxNo: String(ts.taxNo ?? ""),
+        sellerAddressPhone: [String(ts.address ?? ""), String(ts.phone ?? "")].filter(Boolean).join(" "),
+      }));
     }
     const br = await fetch(`/api/tax-subjects/${id}/bank-accounts`);
     const bj = await br.json();
@@ -111,9 +137,14 @@ export default function ApplicationNewPage() {
         buyerBankName: f.buyerBankName, buyerBankAccount: f.buyerBankAccount,
         taxSubjectId: f.taxSubjectId, sellerName: f.sellerName, sellerTaxNo: f.sellerTaxNo, sellerAddress: f.sellerAddressPhone,
         sellerBankName: f.sellerBankName, sellerBankAccount: f.sellerBankAccount,
-        currency: f.currency, cashierName: f.cashierName, reviewerName: f.reviewerName, drawerName: f.drawerName, remark: f.remark,
+        currency: f.currency, deliveryMethod: f.deliveryMethod,
+        cashierName: f.cashierName, reviewerName: f.reviewerName, drawerName: f.drawerName, remark: f.remark,
         amountWithoutTax: f.amountWithoutTax, taxAmount: f.taxAmount, amountWithTax: f.amountWithTax,
-        items: items.map(it => ({ itemName: it.itemName, taxClassificationCode: it.taxClassificationCode, spec: it.spec, unit: it.unit, quantity: it.quantity, unitPrice: it.unitPriceWithTax, amount: it.amount, taxRate: it.taxRate, taxAmount: it.taxAmount })),
+        items: items.map(it => ({
+          itemName: it.itemName, taxClassificationCode: it.taxClassificationCode,
+          spec: it.spec, unit: it.unit, quantity: it.quantity, unitPrice: it.unitPriceWithTax,
+          amount: it.amount, taxRate: it.taxRate, taxAmount: it.taxAmount,
+        })),
       };
       const r = await fetch("/api/applications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const j = await r.json();
@@ -128,7 +159,7 @@ export default function ApplicationNewPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex items-center gap-3">
         <Link href="/applications"><Button variant="ghost" size="icon"><ArrowLeft className="h-4 w-4" /></Button></Link>
-        <h1 className="text-xl font-semibold flex-1">新建开票申请</h1>
+        <h1 className="text-xl font-semibold flex-1">新建开票申请（制单）</h1>
         <Link href="/applications"><Button variant="outline">取消</Button></Link>
         <Button onClick={() => mut.mutate()} disabled={mut.isPending}><Save className="h-4 w-4 mr-2" />{mut.isPending ? "保存中..." : "保存"}</Button>
       </div>
@@ -142,7 +173,7 @@ export default function ApplicationNewPage() {
               <SelectContent>{Object.entries(invoiceCategoryLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
             </Select>
           </FormField>
-          <FormField label="发票税率" required>
+          <FormField label="默认税率(%)" required>
             <Input type="number" step="0.01" value={f.taxRate} onChange={e => {
               const r = +e.target.value;
               setF(p => ({ ...p, taxRate: r }));
@@ -153,6 +184,12 @@ export default function ApplicationNewPage() {
             <Select value={f.currency} onValueChange={v => setF({ ...f, currency: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{Object.entries(currencyLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
+            </Select>
+          </FormField>
+          <FormField label="交付方式" required>
+            <Select value={f.deliveryMethod} onValueChange={v => setF({ ...f, deliveryMethod: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{Object.entries(deliveryLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
             </Select>
           </FormField>
           <FormField label="开票申请号">
@@ -215,19 +252,33 @@ export default function ApplicationNewPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-12 gap-2 px-3 py-1 text-xs text-muted-foreground font-medium">
-            <div className="col-span-3">项目名称</div><div className="col-span-2">规格型号</div><div>单位</div><div>数量</div>
-            <div className="col-span-2">含税单价</div><div className="col-span-2">未税金额</div><div>税额</div>
+            <div className="col-span-2">项目名称</div>
+            <div className="col-span-2">税收编码</div>
+            <div>规格</div>
+            <div>单位</div>
+            <div>数量</div>
+            <div>税率%</div>
+            <div className="col-span-2">含税单价</div>
+            <div>未税金额</div>
           </div>
           {items.map((item, i) => (
             <div key={i} className="grid grid-cols-12 gap-2 p-3 border rounded-sm bg-muted/50 items-center">
-              <div className="col-span-3"><Input placeholder="项目名称" value={item.itemName} onChange={e => updateItem(i, "itemName", e.target.value)} /></div>
-              <div className="col-span-2"><Input placeholder="规格型号" value={item.spec} onChange={e => updateItem(i, "spec", e.target.value)} /></div>
+              <div className="col-span-2"><Input placeholder="项目名称" value={item.itemName} onChange={e => updateItem(i, "itemName", e.target.value)} /></div>
+              <div className="col-span-2">
+                <SelectSearch
+                  value={item.taxClassificationCode}
+                  onValueChange={v => updateItem(i, "taxClassificationCode", v)}
+                  options={taxCodeOptions.map(o => ({ value: o.id, label: o.label }))}
+                  placeholder="搜索编码..."
+                />
+              </div>
+              <Input placeholder="规格" value={item.spec} onChange={e => updateItem(i, "spec", e.target.value)} />
               <Input placeholder="单位" value={item.unit} onChange={e => updateItem(i, "unit", e.target.value)} />
               <Input type="number" value={item.quantity} onChange={e => updateItem(i, "quantity", +e.target.value)} />
+              <Input type="number" step="0.01" value={item.taxRate} onChange={e => updateItem(i, "taxRate", +e.target.value)} />
               <div className="col-span-2"><Input type="number" step="0.01" value={item.unitPriceWithTax || ""} onChange={e => updateItem(i, "unitPriceWithTax", +e.target.value)} /></div>
-              <div className="col-span-2 text-sm tabular-nums text-right px-1">¥{item.amount.toLocaleString()}</div>
               <div className="flex items-center gap-1">
-                <span className="text-sm tabular-nums">¥{item.taxAmount.toLocaleString()}</span>
+                <span className="text-sm tabular-nums w-20 text-right">¥{item.amount.toLocaleString()}</span>
                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeItem(i)} disabled={items.length <= 1}>
                   <Trash2 className="h-3.5 w-3.5 text-destructive" />
                 </Button>
