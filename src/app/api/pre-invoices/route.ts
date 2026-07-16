@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { success, error } from "@/lib/api-response";
+import { generatePreInvoiceNo } from "@/lib/invoice-number";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     return error("购买方、发票类型为必填项");
   }
 
-  const preInvoiceNo = `PI-${Date.now().toString(36).toUpperCase()}`;
+  const preInvoiceNo = generatePreInvoiceNo();
 
   const preInvoice = await db.preInvoice.create({
     data: {

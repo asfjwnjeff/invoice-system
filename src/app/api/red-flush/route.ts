@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { success, error } from '@/lib/api-response';
+import { generateRedFlushNo } from '@/lib/invoice-number';
 import { NextRequest } from 'next/server';
 
 export async function GET(req: NextRequest) {
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await auth(); if (!session) return error('未登录', 401);
   const body = await req.json();
-  const app = await db.redFlushApplication.create({ data: { applicationNo: body.applicationNo, originalInvoiceId: body.originalInvoiceId, redFlushType: body.redFlushType, redFlushReason: body.redFlushReason, reasonDescription: body.reasonDescription ?? '', amountWithoutTax: body.amountWithoutTax ?? 0, taxAmount: body.taxAmount ?? 0, amountWithTax: body.amountWithTax ?? 0, needsReissue: body.needsReissue ?? false } });
+  const app = await db.redFlushApplication.create({ data: { applicationNo: body.applicationNo ?? body.appNo ?? generateRedFlushNo(), originalInvoiceId: body.originalInvoiceId, redFlushType: body.redFlushType, redFlushReason: body.redFlushReason, reasonDescription: body.reasonDescription ?? '', amountWithoutTax: body.amountWithoutTax ?? 0, taxAmount: body.taxAmount ?? 0, amountWithTax: body.amountWithTax ?? 0, needsReissue: body.needsReissue ?? false } });
   try { await db.operationLog.create({ data: { userId: session.user.id, action: 'CREATE', entityType: 'redFlush', entityId: app.id } }); } catch { /* log failure should not block the API */ }
   return success(app, 201);
 }

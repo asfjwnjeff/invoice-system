@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { success, error } from "@/lib/api-response";
+import { generateApplicationNo } from "@/lib/invoice-number";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
 
   const app = await db.outputInvoiceApplication.create({
     data: {
-      applicationNo: body.applicationNo ?? body.appNo,
+      applicationNo: body.applicationNo ?? body.appNo ?? generateApplicationNo(),
       sourceType: body.sourceType ?? "MANUAL",
       sourceId: body.sourceId ?? null,
       taxSubjectId: tsid,

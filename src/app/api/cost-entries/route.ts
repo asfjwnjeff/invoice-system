@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { success, error } from "@/lib/api-response";
+import { generateEntryNo } from "@/lib/invoice-number";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
 
   if (!businessOrderId) return error("业务订单为必填项");
 
-  const entryNo = `CE-${Date.now().toString(36).toUpperCase()}`;
+  const entryNo = generateEntryNo();
 
   const entry = await db.costEntry.create({
     data: {

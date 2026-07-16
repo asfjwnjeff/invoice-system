@@ -28,8 +28,7 @@ export default function ApplicationNewPage() {
   const { data: customers } = useEntitySelect("/api/customers/select");
   const { data: taxSubjects } = useEntitySelect("/api/tax-subjects/select");
 
-  const [appNo] = useState(() => "APP-" + Date.now());
-  const [f, setF] = useState({ applicationNo: appNo, invoiceCategory: "DIGITAL_SPECIAL", taxRate: 6, customerId: "", buyerName: "", buyerTaxNo: "", buyerAddressPhone: "", buyerBankName: "", buyerBankAccount: "", taxSubjectId: "", sellerName: "", sellerTaxNo: "", sellerAddressPhone: "", sellerBankName: "", sellerBankAccount: "", currency: "CNY", cashierName: "", reviewerName: "", drawerName: "", remark: "", amountWithoutTax: 0, taxAmount: 0, amountWithTax: 0 });
+  const [f, setF] = useState({ applicationNo: "", invoiceCategory: "DIGITAL_SPECIAL", taxRate: 6, customerId: "", buyerName: "", buyerTaxNo: "", buyerAddressPhone: "", buyerBankName: "", buyerBankAccount: "", taxSubjectId: "", sellerName: "", sellerTaxNo: "", sellerAddressPhone: "", sellerBankName: "", sellerBankAccount: "", currency: "CNY", cashierName: "", reviewerName: "", drawerName: "", remark: "", amountWithoutTax: 0, taxAmount: 0, amountWithTax: 0 });
   const [items, setItems] = useState<Item[]>([{ ...defaultItem }]);
   const [bankAccounts, setBankAccounts] = useState<{ id: string; label: string; bankName: string; bankAccount: string }[]>([]);
 

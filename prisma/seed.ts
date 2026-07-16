@@ -822,7 +822,7 @@ async function main() {
   // ═══════════════════════════════════════════════════════
   const inputInvDefs = [
     {
-      invNo: "INP-2026-001", invCategory: "VAT_SPECIAL",
+      invNo: "24403200000000000101", invCode: "044032400201", invCategory: "VAT_SPECIAL",
       sellerName: "顺丰速运有限公司", sellerTaxNo: "91440300200000000A",
       sellerAddr: "深圳市南山区科技园南路1号顺丰总部大厦", sellerPhone: "0755-36370000",
       sellerBank: "招商银行深圳南山支行", sellerBankAcct: "7559123456789012",
@@ -840,7 +840,7 @@ async function main() {
       pool: "INPUT", items: [{ name: "国内货物运输服务", qty: 1, price: 7339.45, taxRate: 9 }],
     },
     {
-      invNo: "INP-2026-002", invCategory: "VAT_SPECIAL",
+      invNo: "24403200000000000102", invCode: "044032400202", invCategory: "VAT_SPECIAL",
       sellerName: "京东物流集团", sellerTaxNo: "91110000300000000B",
       sellerAddr: "北京市大兴区亦庄经济开发区京东大厦", sellerPhone: "010-89118888",
       sellerBank: "中国银行北京亦庄支行", sellerBankAcct: "3217567890123456",
@@ -858,7 +858,7 @@ async function main() {
       pool: "INPUT", items: [{ name: "仓储服务费", qty: 1, price: 4716.98, taxRate: 6 }],
     },
     {
-      invNo: "INP-2026-003", invCategory: "DIGITAL_SPECIAL",
+      invNo: "24403200000000000103", invCode: null, invCategory: "DIGITAL_SPECIAL",
       sellerName: "中外运报关有限公司", sellerTaxNo: "91310000400000000C",
       sellerAddr: "上海市浦东新区外高桥保税区富特路500号", sellerPhone: "021-58660000",
       sellerBank: "建设银行上海外高桥支行", sellerBankAcct: "3100123456789012",
@@ -876,7 +876,7 @@ async function main() {
       pool: "INPUT", items: [{ name: "关务服务费", qty: 1, price: 11320.75, taxRate: 6 }],
     },
     {
-      invNo: "INP-2026-004", invCategory: "VAT_SPECIAL",
+      invNo: "24403200000000000104", invCode: "044032400204", invCategory: "VAT_SPECIAL",
       sellerName: "中国外运股份有限公司", sellerTaxNo: "91110000500000000D",
       sellerAddr: "北京市朝阳区安定路5号院外运大厦", sellerPhone: "010-62295555",
       sellerBank: "中国银行北京朝阳支行", sellerBankAcct: "4559123456789012",
@@ -898,7 +898,7 @@ async function main() {
       ],
     },
     {
-      invNo: "INP-2026-005", invCategory: "VAT_SPECIAL",
+      invNo: "24403200000000000105", invCode: "044032400205", invCategory: "VAT_SPECIAL",
       sellerName: "深圳市报关协会服务中心", sellerTaxNo: "91440300600000000E",
       sellerAddr: "深圳市福田区福华三路168号国际商会中心", sellerPhone: "0755-82345678",
       sellerBank: "招商银行深圳福田支行", sellerBankAcct: "7559123456789999",
@@ -920,6 +920,7 @@ async function main() {
     await db.inputInvoice.create({
       data: {
         invoiceNo: iinv.invNo,
+        invoiceCode: (iinv as Record<string,unknown>).invCode as string ?? null,
         invoiceCategory: iinv.invCategory,
         sellerName: iinv.sellerName,
         sellerTaxNo: iinv.sellerTaxNo,

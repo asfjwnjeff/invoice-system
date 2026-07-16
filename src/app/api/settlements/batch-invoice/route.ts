@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { success, error } from '@/lib/api-response';
+import { generateApplicationNo } from '@/lib/invoice-number';
 import { NextRequest } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
   for (const sid of settlementIds) {
     const stl = await db.settlement.findUnique({ where: { id: sid } });
     if (!stl) continue;
-    const applicationNo = `APP-BATCH-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const applicationNo = generateApplicationNo();
     await db.outputInvoiceApplication.create({
       data: {
         applicationNo,

@@ -21,7 +21,7 @@ interface T { id: string; appNo: string; originalInvoiceId: string; redFlushType
 export default function Page() {
   const qc = useQueryClient(); const [open, setOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [f, setF] = useState({ appNo:"RF-"+Date.now(), originalInvoiceId:"", redFlushType:"FULL", redFlushReason:"SALES_RETURN", reasonDetail:"", amountWithoutTax:0, taxAmount:0, amountWithTax:0, needsReissue:false });
+  const [f, setF] = useState({ appNo:"", originalInvoiceId:"", redFlushType:"FULL", redFlushReason:"SALES_RETURN", reasonDetail:"", amountWithoutTax:0, taxAmount:0, amountWithTax:0, needsReissue:false });
   const [validation, setValidation] = useState<{ verifyStatus: string; usageStatus: string; canProceed: boolean; message: string }>({ verifyStatus: "", usageStatus: "", canProceed: false, message: "" });
   const invoiceSelect = useEntitySelect("/api/output-invoices/select" as string);
   const { data } = useQuery({ queryKey:["red-flush"], queryFn: async () => { const r = await fetch("/api/red-flush"); return (await r.json()).data as { items: T[] }; } });

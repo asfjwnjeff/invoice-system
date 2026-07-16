@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { success, error } from "@/lib/api-response";
+import { generateInvoiceNo, generateInvoiceCode } from "@/lib/invoice-number";
 
 // MOCK: Pull newly issued invoices from tax bureau into the system
 // Tax bureau has issued invoices → sync them to our system
@@ -17,8 +18,8 @@ export async function POST() {
   const created: string[] = [];
 
   for (let i = 0; i < count; i++) {
-    const invoiceNo = `04400${String(Math.floor(Math.random() * 9999999999)).padStart(12, "0")}`;
-    const invoiceCode = `04400${String(Math.floor(Math.random() * 9999999)).padStart(8, "0")}`;
+    const invoiceNo = generateInvoiceNo();
+    const invoiceCode = generateInvoiceCode();
     const amount = Math.floor(Math.random() * 500000) + 10000;
     const taxRate = [6, 9, 13][Math.floor(Math.random() * 3)]!;
     const taxAmount = Math.round(amount * taxRate / 100);

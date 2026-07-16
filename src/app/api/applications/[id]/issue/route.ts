@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { success, error } from "@/lib/api-response";
+import { generateInvoiceNo, generateTaxFlowNo } from "@/lib/invoice-number";
 import { NextRequest } from "next/server";
-import { randomUUID } from "crypto";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth(); if (!session) return error("未登录", 401);
@@ -12,8 +12,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   if (!app) return error("申请不存在", 404);
   if (app.status === "ISSUED") return error("已开具，不能重复开票");
 
-  const invoiceNo = `INV-${Date.now().toString(36).toUpperCase()}-${randomUUID().slice(0, 4).toUpperCase()}`;
-  const taxFlowNo = `TAX-${randomUUID().slice(0, 8).toUpperCase()}`;
+  const invoiceNo = generateInvoiceNo();
+  const taxFlowNo = generateTaxFlowNo();
 
   const invoice = await db.outputInvoice.create({
     data: {
