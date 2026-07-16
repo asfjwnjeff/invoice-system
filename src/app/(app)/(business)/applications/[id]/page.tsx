@@ -9,23 +9,20 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil } from "lucide-react";
 
 const catLabels: Record<string, string> = {
-  DIGITAL_SPECIAL: "数电专票", DIGITAL_NORMAL: "数电普票",
-  VAT_SPECIAL: "增值税专票", VAT_NORMAL: "增值税普票", E_NORMAL: "电子普票",
+  DIGITAL_SPECIAL: "增值税专用发票(数电)",
+  DIGITAL_NORMAL: "增值税普通发票(数电)",
+  VAT_SPECIAL: "INVOICE发票",
 };
 const appStatusLabels: Record<string, string> = {
   DRAFT: "草稿", PENDING_APPROVAL: "待审批", APPROVED: "已审批",
   REJECTED: "已驳回", ISSUED: "已开票", CONVERTED: "已制单",
 };
 const currencyLabels: Record<string, string> = {
-  CNY: "人民币", USD: "美元", HKD: "港币", JPY: "日元",
-  EUR: "欧元", AUD: "澳大利亚元", GBP: "英镑",
-};
-const deliveryLabels: Record<string, string> = {
-  EMAIL: "邮件发送", DOWNLOAD: "自行下载", MANUAL: "线下交付",
+  CNY: "人民币", AUD: "澳大利亚元", EUR: "欧元", USD: "美元", HKD: "港币", JPY: "日元", GBP: "英镑",
 };
 
 interface ApplicationData {
-  id: string; applicationNo: string; invoiceCategory: string; currency: string; deliveryMethod: string; status: string;
+  id: string; applicationNo: string; invoiceCategory: string; currency: string; status: string;
   buyerName: string; buyerTaxNo: string; buyerAddress: string; buyerBankName: string; buyerBankAccount: string;
   sellerName: string; sellerTaxNo: string; sellerAddress: string; sellerBankName: string; sellerBankAccount: string;
   amountWithoutTax: number; taxAmount: number; amountWithTax: number;
@@ -81,8 +78,7 @@ export default function ApplicationDetailPage() {
           <DetailField label="申请号" value={S(data.applicationNo)} />
           <DetailField label="发票类型" value={catLabels[S(data.invoiceCategory)] ?? S(data.invoiceCategory)} />
           <DetailField label="记账币种" value={currencyLabels[S(data.currency)] ?? S(data.currency)} />
-          <DetailField label="交付方式" value={deliveryLabels[S(data.deliveryMethod)] ?? S(data.deliveryMethod)} />
-          <DetailField label="发票状态" value={appStatusLabels[S(data.status)] ?? S(data.status)} />
+          <DetailField label="状态" value={appStatusLabels[S(data.status)] ?? S(data.status)} />
         </CardContent>
       </Card>
 

@@ -14,19 +14,16 @@ import { toast } from "sonner";
 import { useEntitySelect } from "@/lib/hooks/use-entity-select";
 
 const invoiceCategoryLabels: Record<string, string> = {
-  DIGITAL_SPECIAL: "增值税专用发票(数电)", DIGITAL_NORMAL: "增值税普通发票(数电)",
-  VAT_SPECIAL: "增值税专票(纸质)", VAT_NORMAL: "增值税普票(纸质)", E_NORMAL: "电子普票",
+  DIGITAL_SPECIAL: "增值税专用发票(数电)",
+  DIGITAL_NORMAL: "增值税普通发票(数电)",
+  VAT_SPECIAL: "INVOICE发票",
 };
 const currencyLabels: Record<string, string> = {
-  CNY: "人民币", USD: "美元", HKD: "港币", JPY: "日元",
-  EUR: "欧元", AUD: "澳大利亚元", GBP: "英镑",
-};
-const deliveryLabels: Record<string, string> = {
-  EMAIL: "邮件发送", DOWNLOAD: "自行下载", MANUAL: "线下交付",
+  CNY: "人民币", AUD: "澳大利亚元", EUR: "欧元", USD: "美元", HKD: "港币", JPY: "日元", GBP: "英镑",
 };
 const taxRateOptions = ["0", "6", "9", "13"];
 const defaultTaxRateByCategory: Record<string, number> = {
-  DIGITAL_SPECIAL: 6, DIGITAL_NORMAL: 6, VAT_SPECIAL: 13, VAT_NORMAL: 6, E_NORMAL: 6,
+  DIGITAL_SPECIAL: 13, DIGITAL_NORMAL: 6, VAT_SPECIAL: 0,
 };
 
 interface Item {
@@ -42,15 +39,15 @@ interface FormState {
   applicationNo: string; invoiceCategory: string; taxRate: number;
   customerId: string; buyerName: string; buyerTaxNo: string; buyerAddressPhone: string; buyerBankName: string; buyerBankAccount: string;
   taxSubjectId: string; sellerName: string; sellerTaxNo: string; sellerAddressPhone: string; sellerBankName: string; sellerBankAccount: string;
-  currency: string; deliveryMethod: string; cashierName: string; reviewerName: string; drawerName: string; remark: string;
+  currency: string; cashierName: string; reviewerName: string; drawerName: string; remark: string;
   amountWithoutTax: number; taxAmount: number; amountWithTax: number;
 }
 
 const emptyForm = (): FormState => ({
-  applicationNo: "", invoiceCategory: "DIGITAL_SPECIAL", taxRate: 6,
+  applicationNo: "", invoiceCategory: "DIGITAL_SPECIAL", taxRate: 13,
   customerId: "", buyerName: "", buyerTaxNo: "", buyerAddressPhone: "", buyerBankName: "", buyerBankAccount: "",
   taxSubjectId: "", sellerName: "", sellerTaxNo: "", sellerAddressPhone: "", sellerBankName: "", sellerBankAccount: "",
-  currency: "CNY", deliveryMethod: "EMAIL", cashierName: "", reviewerName: "", drawerName: "", remark: "",
+  currency: "CNY", cashierName: "", reviewerName: "", drawerName: "", remark: "",
   amountWithoutTax: 0, taxAmount: 0, amountWithTax: 0,
 });
 
@@ -67,7 +64,7 @@ export default function ApplicationEditPage() {
   const taxCodeOptions = (taxCodesData ?? []) as { id: string; label: string }[];
 
   const [f, setF] = useState<FormState>(emptyForm());
-  const [items, setItems] = useState<Item[]>([{ ...defaultItem }]);
+  const [items, setItems] = useState<Item[]>([{ ...defaultItem, taxRate: 13 }]);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
 
   const { data: app, isLoading } = useQuery({
@@ -79,12 +76,12 @@ export default function ApplicationEditPage() {
     if (!app) return;
     setF({
       applicationNo: String(app.applicationNo ?? ""), invoiceCategory: String(app.invoiceCategory ?? "DIGITAL_SPECIAL"),
-      taxRate: +(((app.items as Record<string, unknown>[])?.[0]?.taxRate) || 6),
+      taxRate: +(((app.items as Record<string, unknown>[])?.[0]?.taxRate) || 13),
       customerId: String(app.customerId ?? ""), buyerName: String(app.buyerName ?? ""), buyerTaxNo: String(app.buyerTaxNo ?? ""),
       buyerAddressPhone: String(app.buyerAddress ?? ""), buyerBankName: String(app.buyerBankName ?? ""), buyerBankAccount: String(app.buyerBankAccount ?? ""),
       taxSubjectId: String(app.taxSubjectId ?? ""), sellerName: String(app.sellerName ?? ""), sellerTaxNo: String(app.sellerTaxNo ?? ""),
       sellerAddressPhone: String(app.sellerAddress ?? ""), sellerBankName: String(app.sellerBankName ?? ""), sellerBankAccount: String(app.sellerBankAccount ?? ""),
-      currency: String(app.currency ?? "CNY"), deliveryMethod: String(app.deliveryMethod ?? "EMAIL"),
+      currency: String(app.currency ?? "CNY"),
       cashierName: String(app.cashierName ?? ""), reviewerName: String(app.reviewerName ?? ""),
       drawerName: String(app.drawerName ?? ""), remark: String(app.remark ?? ""),
       amountWithoutTax: Number(app.amountWithoutTax ?? 0), taxAmount: Number(app.taxAmount ?? 0), amountWithTax: Number(app.amountWithTax ?? 0),
@@ -135,7 +132,9 @@ export default function ApplicationEditPage() {
     const tc = taxCodeOptions.find(o => o.id === codeId);
     if (tc) {
       const parts = tc.label.split(" — ");
-      next[i] = { ...next[i]!, taxClassificationCode: parts[0] ?? "", itemName: parts[1]?.replace(/\s*\(\d+%\)$/, "") ?? next[i]!.itemName, taxRate: +((parts[1]?.match(/\((\d+)%\)/) ?? [])[1] ?? next[i]!.taxRate) };
+      const name = parts[1]?.replace(/\s*\(\d+%\)$/, "") ?? "";
+      const rate = +((parts[1]?.match(/\((\d+)%\)/) ?? [])[1] ?? next[i]!.taxRate);
+      next[i] = { ...next[i]!, taxClassificationCode: parts[0] ?? "", itemName: name, taxRate: rate };
     }
     setItems(next);
     recalcTotals(next);
@@ -186,8 +185,7 @@ export default function ApplicationEditPage() {
         buyerBankName: f.buyerBankName, buyerBankAccount: f.buyerBankAccount,
         taxSubjectId: f.taxSubjectId, sellerName: f.sellerName, sellerTaxNo: f.sellerTaxNo, sellerAddress: f.sellerAddressPhone,
         sellerBankName: f.sellerBankName, sellerBankAccount: f.sellerBankAccount,
-        currency: f.currency, deliveryMethod: f.deliveryMethod,
-        cashierName: f.cashierName, reviewerName: f.reviewerName, drawerName: f.drawerName, remark: f.remark,
+        currency: f.currency, cashierName: f.cashierName, reviewerName: f.reviewerName, drawerName: f.drawerName, remark: f.remark,
         amountWithoutTax: f.amountWithoutTax, taxAmount: f.taxAmount, amountWithTax: f.amountWithTax,
         items: items.map(it => ({
           itemName: it.itemName, taxClassificationCode: it.taxClassificationCode,
@@ -240,12 +238,6 @@ export default function ApplicationEditPage() {
               <SelectContent>{Object.entries(currencyLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
             </Select>
           </FormField>
-          <FormField label="交付方式">
-            <Select value={f.deliveryMethod} onValueChange={v => setF({ ...f, deliveryMethod: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{Object.entries(deliveryLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
-            </Select>
-          </FormField>
         </CardContent>
       </Card>
 
@@ -265,7 +257,7 @@ export default function ApplicationEditPage() {
             <FormField label="购方地址电话" fullWidth>
               <Input value={f.buyerAddressPhone} onChange={e => setF({ ...f, buyerAddressPhone: e.target.value })} placeholder="地址、电话" />
             </FormField>
-            <FormField label="购方银行账号" fullWidth>
+            <FormField label="购方银行帐号" fullWidth>
               <Input value={`${f.buyerBankName} ${f.buyerBankAccount}`.trim()} onChange={e => { const parts = e.target.value.split(" "); setF({ ...f, buyerBankName: parts[0] ?? "", buyerBankAccount: parts.slice(1).join(" ") }); }} placeholder="开户行 账号" />
             </FormField>
           </CardContent>
@@ -279,7 +271,7 @@ export default function ApplicationEditPage() {
               <div className="flex justify-between border-t pt-2"><span className="text-muted-foreground">价税合计</span><strong className="tabular-nums text-base">¥{f.amountWithTax.toLocaleString()}</strong></div>
             </div>
             <div className="mt-4">
-              <FormField label="记账金额（未税）">
+              <FormField label="记账金额">
                 <Input value={f.amountWithoutTax} disabled className="bg-muted tabular-nums" />
               </FormField>
             </div>
@@ -294,8 +286,8 @@ export default function ApplicationEditPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-12 gap-2 px-3 py-1 text-xs text-muted-foreground font-medium">
-            <div className="col-span-2">项目名称</div>
-            <div>规格</div>
+            <div className="col-span-3">项目名称</div>
+            <div>规格型号</div>
             <div>单位</div>
             <div>数量</div>
             <div className="col-span-2">含税单价</div>
@@ -305,16 +297,15 @@ export default function ApplicationEditPage() {
           </div>
           {items.map((item, i) => (
             <div key={i} className="grid grid-cols-12 gap-2 p-3 border rounded-sm bg-muted/50 items-center">
-              <div className="col-span-2 space-y-1">
+              <div className="col-span-3">
                 <SelectSearch
                   value={item.taxClassificationCode ? taxCodeOptions.find(o => o.label.startsWith(item.taxClassificationCode))?.id ?? "" : ""}
                   onValueChange={v => selectTaxCode(i, v)}
                   options={taxCodeOptions.map(o => ({ value: o.id, label: o.label }))}
-                  placeholder="编码..."
+                  placeholder="搜索编码或项目名称..."
                 />
-                <Input placeholder="项目名称" value={item.itemName} onChange={e => updateItem(i, "itemName", e.target.value)} />
               </div>
-              <Input placeholder="规格" value={item.spec} onChange={e => updateItem(i, "spec", e.target.value)} />
+              <Input placeholder="规格型号" value={item.spec} onChange={e => updateItem(i, "spec", e.target.value)} />
               <Input placeholder="单位" value={item.unit} onChange={e => updateItem(i, "unit", e.target.value)} />
               <Input type="number" value={item.quantity} onChange={e => updateItem(i, "quantity", +e.target.value)} />
               <div className="col-span-2"><Input type="number" step="0.01" value={item.unitPriceWithTax || ""} onChange={e => updateItem(i, "unitPriceWithTax", +e.target.value)} /></div>
@@ -353,7 +344,7 @@ export default function ApplicationEditPage() {
               <FormField label="销方地址电话" fullWidth>
                 <Input value={f.sellerAddressPhone} disabled className="bg-muted" />
               </FormField>
-              <FormField label="销方银行账号" fullWidth>
+              <FormField label="销方银行帐号" fullWidth>
                 <Select value={`${f.sellerBankName} ${f.sellerBankAccount}`.trim()} onValueChange={v => {
                   const ba = bankAccounts.find(b => `${b.bankName} ${b.bankAccount}` === v);
                   if (ba) setF(p => ({ ...p, sellerBankName: ba.bankName, sellerBankAccount: ba.bankAccount }));
@@ -381,16 +372,17 @@ export default function ApplicationEditPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <Card className="lg:col-span-3">
-          <CardHeader className="pb-3"><CardTitle className="text-base">备注与单据</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <FormField label="开票申请号">
-              <Input value={f.applicationNo} disabled className="bg-muted" placeholder="自动生成" />
-            </FormField>
-            <FormField label="备注">
-              <Input value={f.remark} onChange={e => setF({ ...f, remark: e.target.value })} placeholder="备注信息" />
-            </FormField>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">备注</CardTitle></CardHeader>
+          <CardContent>
+            <Input value={f.remark} onChange={e => setF({ ...f, remark: e.target.value })} placeholder="备注信息" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3"><CardTitle className="text-base">开票申请号</CardTitle></CardHeader>
+          <CardContent>
+            <Input value={f.applicationNo} disabled className="bg-muted" placeholder="自动生成" />
           </CardContent>
         </Card>
       </div>
