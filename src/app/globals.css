@@ -40,6 +40,9 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
+  --color-header-border: var(--header-border);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -82,6 +85,10 @@
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #323240;
   --sidebar-ring: #5E9EFF;
+  /* Header — darker than card, lighter than sidebar */
+  --header: #252532;
+  --header-foreground: #FFFFFF;
+  --header-border: #353542;
 }
 
 /* ── iOS-Style Dark ── */
@@ -118,6 +125,10 @@
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #252527;
   --sidebar-ring: #A1A1A1;
+  /* Header — darker than card, lighter than sidebar */
+  --header: #111116;
+  --header-foreground: #F5F5F7;
+  --header-border: #222226;
 }
 
 @layer base {

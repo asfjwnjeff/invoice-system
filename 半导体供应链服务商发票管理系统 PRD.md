@@ -1,6 +1,6 @@
-# 半导体供应链服务商发票管理系统 PRD v2.0
+# 半导体供应链服务商发票管理系统 PRD v2.1
 
-> **版本**: v2.0 | **日期**: 2026-07-16 | **状态**: 现状文档（记录已实现功能）
+> **版本**: v2.1 | **日期**: 2026-07-16 | **状态**: 现状文档（记录已实现功能）
 
 ---
 
@@ -204,14 +204,14 @@ C01 发票登记：
 
 ```
 ┌─────────────────────────────────────────────┐
-│  页面层 (27 pages)                          │
+│  页面层 (31 pages)                          │
 │  src/app/(app)/**/page.tsx                  │
 │  useState form + TanStack Query + Dialog    │
 ├─────────────────────────────────────────────┤
-│  组件层 (24 components)                     │
-│  shared/ (7) + layout/ (5) + ui/ (17)      │
+│  组件层 (32 components)                     │
+│  shared/ (10) + layout/ (5) + ui/ (17)     │
 ├─────────────────────────────────────────────┤
-│  API 层 (57 endpoints)                      │
+│  API 层 (62 route files)                    │
 │  RESTful: GET/POST/PUT/DELETE + batch/select│
 ├─────────────────────────────────────────────┤
 │  服务层 (5 services)                        │
@@ -231,7 +231,9 @@ C01 发票登记：
   <head> Inter + Noto Sans SC (Google Fonts) </head>
   <body>
     ThemeProvider → SessionProvider → TooltipProvider → QueryProvider
-    ├── Sidebar + Header + <main> (页面内容)
+    ├── Sidebar (深色 #1C1C24, 可折叠分组 + 细分隔线 + 版本号 + 隐藏滚动条)
+    ├── Header (bg-card, 用户信息 + 主题切换)
+    ├── <main> (页面内容)
     └── <Toaster position="top-center" />
   </body>
 </html>
@@ -239,14 +241,27 @@ C01 发票登记：
 
 ### 5.3 页面 CRUD 模式
 
+**模式 A：FormDialog 弹窗模式**（推荐，代垫管理/作废管理等简单 CRUD）
+
 ```tsx
-// 所有 CRUD 页面统一模式
+// 单页 List + FormDialog 弹窗 CRUD
+const [open, setOpen] = useState(false);
 const [editId, setEditId] = useState<string|null>(null);
-const [f, setF] = useState({...});         // 表单状态
-const { data } = useQuery({...});           // 数据获取
-const sm = useMutation({ onSuccess: () => toast.success("已保存") });
-const dm = useMutation({ onSuccess: () => toast.success("已删除") });
-// 所有 mutation onError → toast.error
+const [viewMode, setViewMode] = useState(false);
+const [f, setF] = useState(empty());
+const { data } = useQuery({...});
+const sm = useMutation({ onSuccess: () => { toast.success("已保存"); qc.invalidateQueries(...); } });
+// FormDialog: width="2xl", grid-cols-2 gap-x-8 gap-y-6
+// FormField: label mb-2.5, required 红星, fullWidth → col-span-2
+// 只读: <fieldset disabled className="contents">
+```
+
+**模式 B：独立页面模式**（开票申请等复杂表单，含多个 Card 分区 + 动态明细行）
+
+```tsx
+// 独立 /new、/[id]、/[id]/edit 页面
+// 使用 FormField + SelectSearch 统一组件
+// Card 分区布局，保持设计标准间距
 ```
 
 ### 5.4 服务层模式
@@ -289,7 +304,7 @@ createService(entity, schema, searchFields, extraData?, include?)
 
 | 页面 | 路由 | 功能 |
 |------|------|------|
-| 开票申请 | `/applications` | 列表/新建/详情/编辑/CRUD，关联结算单或收入订单 |
+| 开票申请 | `/applications` | 列表（FilterPanel + SelectSearch 筛选，查询/重置，多选，操作列固定，状态条件按钮）+ 新建/编辑（独立页，FormField + SelectSearch 统一组件，Card 分区 + 动态明细行 + 自动计算税额）+ 详情（FormField 只读展示） |
 | 预制发票 | `/pre-invoices` | 列表/新建/详情，一审/二审，推送艾特票 |
 | 销项发票管理 | `/invoices` | 列表/新建/详情/编辑/CRUD，查验状态/交付状态/使用状态追踪 |
 
@@ -306,20 +321,27 @@ createService(entity, schema, searchFields, extraData?, include?)
 - 发票预览抽屉
 - 同步/通知/归档按钮（Toast 反馈）
 
-### 6.4 红冲作废
+### 6.4 预付款
+
+| 页面 | 路由 | 功能 |
+|------|------|------|
+| 代垫管理 | `/advance-payments` | 列表/C11预付款登记/CRUD，11字段表单（预付款公司/区域/供应商/费用项目/币种/金额/预付款单号/业务编号/提单号/收款账号/备注），FilterPanel筛选设置，SelectSearch可搜索下拉，查询/重置按钮，表格多选+操作列固定，FormDialog弹窗编辑，字段禁用只读模式 |
+
+### 6.5 红冲作废
 
 | 页面 | 路由 | 功能 |
 |------|------|------|
 | 红冲管理 | `/red-flush` | 列表/新建红冲申请，关联蓝票，条件校验，状态追踪 |
+| 作废管理 | `/void-applications` | 列表/新建作废申请，关联蓝票，状态追踪 |
 
-### 6.5 进项归档
+### 6.7 进项归档
 
 | 页面 | 路由 | 功能 |
 |------|------|------|
 | 进项发票 | `/input-invoices` | 列表/手工录入/编辑/详情，OCR 上传，批量查验，状态过滤（查验/认证/抬头校验），成本分摊，代垫标记 |
 | 成本录入 | `/cost-entry` | 列表/CRUD，F01/C01 状态追踪，关联业务订单/供应商/成本中心 |
 
-### 6.6 审批中心
+### 6.8 审批中心
 
 | 页面 | 路由 | 功能 |
 |------|------|------|
@@ -331,7 +353,7 @@ createService(entity, schema, searchFields, extraData?, include?)
 - 审批记录完整追溯
 - WorkflowDefinition → WorkflowInstance → ApprovalRecord 三层模型
 
-### 6.7 主数据
+### 6.9 主数据
 
 | 页面 | 路由 | 功能 |
 |------|------|------|
@@ -342,14 +364,14 @@ createService(entity, schema, searchFields, extraData?, include?)
 | 服务项目管理 | `/master-data/invoice-items` | CRUD，关联税收编码 |
 | 税收编码管理 | `/master-data/tax-codes` | CRUD，税率配置 |
 
-### 6.8 风控报表
+### 6.10 风控报表
 
 | 页面 | 路由 | 功能 |
 |------|------|------|
 | 风控中心 | `/risk-reports/risk-center` | 风险规则运行结果列表，风险等级分类 |
 | 报表分析 | `/risk-reports/reports` | KPI 指标展示 |
 
-### 6.9 共享组件
+### 6.11 共享组件（10 个 shared/ 组件）
 
 | 组件 | 功能 |
 |------|------|
@@ -357,9 +379,24 @@ createService(entity, schema, searchFields, extraData?, include?)
 | **PageHeader** | 页面标题 + 描述 + 操作按钮 |
 | **StatusBadge** | 5 种状态变体: success/warning/danger/info/neutral |
 | **ConfirmDialog** | 确认/取消弹窗，支持 danger 变体和 loading 状态 |
+| **FormDialog** | 统一 B 端表单弹窗（`width="2xl"`, 672px），`grid-cols-2 gap-x-8 gap-y-6` 布局，`loading`/`submitLabel` 控制 |
+| **FormField** | 表单字段包装器，标签 `mb-2.5` 间距，`required` 红色星号，`fullWidth` → `col-span-2` |
+| **FilterPanel** | 筛选字段自定义面板：齿轮按钮 + 弹窗，拖拽手柄 + 勾选框 + 上下箭头排序，`localStorage` 持久化，SSR 安全 |
 | **EmptyState** | 空数据占位，带 Inbox 图标 + 可选操作 |
 | **FileUpload** | 拖拽/点击上传，POST /api/files |
 | **InvoicePreviewDrawer** | 右侧滑出面板，标签切换（PDF/OFD/XML），占位预览 |
+
+### 6.12 UI 组件（17 个 ui/ 组件）
+
+标准 shadcn/ui 组件 + **SelectSearch**（可搜索下拉框，>10 选项必用，`min-w-[200px]` 面板，`truncate` + `title` tooltip）。Input/Select 统一 `h-9` 高度。
+
+### 6.13 设计标准
+
+详见 `docs/design-standard.md`（代垫管理页面为基准参考）。核心约定：
+- **筛选栏**: FilterPanel + SelectSearch（枚举>10项）/ Select（枚举<10项）/ Input（关键字），查询/重置按钮，`draft → applied` 延迟生效
+- **表格**: `bg-muted font-semibold` 表头, `h-11` 行高, `tabular-nums` 金额列, `stickyRightColumns` 操作列
+- **弹窗**: FormDialog + FormField，`grid-cols-2 gap-x-8 gap-y-6`，`required` 红星，`fieldset disabled` 只读
+- **操作列**: 查看(ghost) / 编辑(ghost+Pencil) / 删除(ghost+Trash2 destructive)，`meta.headerClassName: "text-center"`
 
 ---
 
@@ -562,12 +599,13 @@ DRAFT → PENDING_CONFIRM → CONFIRMED → PENDING_COLLECTION
 | 1 | 红冲条件 | 查验结果=查验成功 **且** 业务状态∈{作废、红冲、验证成功}，两个条件必须同时成立 |
 | 2 | 成本分摊 | 暂不需要 |
 | 3 | 外部接口 | 暂不处理（艾特票/税局/链票接口规范后续再定） |
-| 4 | 代垫管理页面 | **需要实现** |
-| 5 | 作废管理页面 | **需要实现** |
+| 4 | 代垫管理页面 | ✅ **已实现** — C11 预付款登记，11 字段表单，FilterPanel + SelectSearch 筛选，FormDialog 弹窗，为设计标准基准页 |
+| 5 | 作废管理页面 | ✅ **已实现** — 作废申请列表 + 新建 + 状态追踪 |
 | 6 | 权限管控 | **按角色和用户进行权限管控** |
-| 7 | 发票号规则 | **按中国真实发票规则**（参见国家税务总局公告） |
-| 8 | 侧边栏 | 主数据管理不需要侧边栏入口，当前颜色保持不变 |
+| 7 | 发票号规则 | ✅ **已实现** — 20位中国数电发票号（`src/lib/invoice-number.ts`），符合国家税务总局公告2024年第11号 |
+| 8 | 侧边栏 | 保持左侧菜单栏模式（含可折叠分组 + 版本号 v2.0 + 细分隔线 + 隐藏滚动条）。**曾探索顶栏 Tab + 左侧子菜单两级导航方案**（2026-07-16），Header 深色背景（`#252532`，比侧边栏 `#1C1C24` 浅），顶部 6 个分类 Tab 点击切换侧边栏子菜单。最终选择保留单级左侧菜单，顶栏方案已记录备查 |
 | 9 | 移动端 | 暂不需要适配 |
+| 10 | 设计标准 | ✅ **已确立** — 见 `docs/design-standard.md`，代垫管理为基准页面，开票申请已完成对齐 |
 
 ## 12. 下一步待办
 
@@ -577,15 +615,19 @@ DRAFT → PENDING_CONFIRM → CONFIRMED → PENDING_COLLECTION
 - [ ] API 级权限校验（基于 session.user.role）
 - [ ] 用户-组织关联（多组织数据隔离）
 
-### 12.2 页面补全
-- [ ] **代垫管理** (`/advance-payments`)：列表 + 详情 + CRUD
-- [ ] **作废管理** (`/void-applications`)：列表 + 新建作废申请 + 状态追踪
-- [ ] **海关票据** (`/customs-payment-books`)：列表 + 详情（如需要）
+### 12.2 设计标准迁移
+以下页面尚未按 `docs/design-standard.md` 对齐，需要后续改造：
+- [ ] 预制发票 (`/pre-invoices`) — 筛选栏 + 表格多选 + 操作列固定
+- [ ] 销项发票管理 (`/invoices`) — 筛选栏 + 表格多选 + 操作列固定
+- [ ] 收入订单 (`/revenue-orders`) — 筛选栏对齐
+- [ ] 业务订单 (`/business-orders`) — 筛选栏对齐
+- [ ] 费用管理 (`/fee-items`) — 筛选栏对齐
+- [ ] 客户结算 (`/customer-settlements`) — 筛选栏对齐
+- [ ] 红冲管理 (`/red-flush`) — 筛选栏 + 操作按钮
+- [ ] 进项发票 (`/input-invoices`) — 筛选栏对齐
 
-### 12.3 发票规则
-- [ ] 发票号按中国规则生成（税号 + 年月日 + 批次 + 流水号）
-- [ ] 发票代码编码规则
-- [ ] 数电票 vs 纸质票的字段差异对齐
+### 12.3 页面补全
+- [ ] **海关票据** (`/customs-payment-books`)：列表 + 详情（如需要）
 
 ### 12.4 待确认
 - [ ] 风控中心/报表分析需要哪些具体指标？
