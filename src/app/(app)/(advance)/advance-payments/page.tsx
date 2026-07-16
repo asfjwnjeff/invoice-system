@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { FilterPanel } from "@/components/shared/filter-panel";
 import { useEntitySelect } from "@/lib/hooks/use-entity-select";
 
 const COMPANY_OPTIONS = [
@@ -38,6 +39,11 @@ const CURRENCY_OPTIONS = ["CNY","USD","HKD","JPY","EUR","AUD","GBP","SGD"];
 const CURRENCY_LABELS: Record<string,string> = { CNY:"人民币", USD:"美元", HKD:"港币", JPY:"日元", EUR:"欧元", AUD:"澳大利亚元", GBP:"英镑", SGD:"新加坡元" };
 
 const COLLECTION_LABELS: Record<string, string> = { PENDING: "待收款", PARTIALLY: "部分收款", COLLECTED: "已收款", WRITTEN_OFF: "已核销" };
+const STATUS_TABS = [
+  { key: "", label: "全部" },
+  { key: "COLLECTED", label: "付款" },
+  { key: "WRITTEN_OFF", label: "核销" },
+];
 
 interface T { id: string; advanceNo: string; organization?: { name: string } | null; zone: string | null; supplier?: { name: string } | null; feeType: string; currency: string; originalAmount: number; businessOrderNo: string | null; mawbNo: string | null; collectionStatus: string; createdAt: string; }
 
@@ -45,10 +51,16 @@ const E = "advance-payments";
 const dt = () => new Date().toISOString().slice(0, 10);
 const empty = () => ({ advanceNo:"", organizationId:"", zone:"", supplierId:"", bankAccountNo:"", feeType:"", occurredDate:dt(), currency:"CNY", originalAmount:0, businessOrderNo:"", mawbNo:"", remark:"" });
 
+
 export default function Page() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false); const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [orgF, setOrgF] = useState(""); const [zoneF, setZoneF] = useState(""); const [feeF, setFeeF] = useState(""); const [statusF, setStatusF] = useState("");
+  const [applied, setApplied] = useState({ org:"", zone:"", fee:"", status:"" });
+  const [filterOrder, setFilterOrder] = useState<string[]>(["company","zone","fee","status"]);
   const [f, setF] = useState(empty());
   const supplierItems = useEntitySelect("/api/suppliers/select");
   const supplierOptions = (supplierItems.data ?? []) as { id: string; label: string }[];
@@ -56,7 +68,6 @@ export default function Page() {
   const { data } = useQuery({ queryKey:[E], queryFn: async () => { const r = await fetch(`/api/${E}`); const j = await r.json(); return j.data as { items: T[] }; } });
   const sm = useMutation({ mutationFn: async () => { const m = editId ? "PUT" : "POST"; const u = editId ? `/api/${E}/${editId}` : `/api/${E}`; const r = await fetch(u, { method:m, headers:{"Content-Type":"application/json"}, body:JSON.stringify(f) }); return r.json(); }, onSuccess: (r) => { if (r.success) { toast.success(editId ? "已更新" : "已创建"); setOpen(false); setF(empty()); setEditId(null); qc.invalidateQueries({queryKey:[E]}); } else toast.error(r.error ?? "失败"); } });
   const dm = useMutation({ mutationFn: (id: string) => fetch(`/api/${E}/${id}`, { method:"DELETE" }), onSuccess: () => { toast.success("已删除"); qc.invalidateQueries({queryKey:[E]}); } });
-
   const sv = (s: string): "success"|"warning"|"danger"|"neutral" => s==="COLLECTED"||s==="APPROVED"?"success":s==="PARTIALLY"||s==="PENDING_COLLECTION"?"warning":"neutral";
 
   const cols: ColumnDef<T>[] = [
@@ -71,20 +82,54 @@ export default function Page() {
     { accessorKey:"businessOrderNo", header:"业务编号", cell:({row}) => row.original.businessOrderNo ?? "-" },
     { accessorKey:"mawbNo", header:"提单号", cell:({row}) => row.original.mawbNo ?? "-" },
     { accessorKey:"createdAt", header:"创建时间", cell:({row}) => new Date(row.original.createdAt).toLocaleDateString("zh-CN") },
-    { id:"act", header:"操作", cell:({row}) => (
+    { id:"act", header:"操作", meta: { headerClassName: "text-center" }, cell:({row}) => {
+      const load = () => setF({ advanceNo:row.original.advanceNo, organizationId:row.original.organization?.name ? COMPANY_OPTIONS.find(c=>c.label===row.original.organization?.name)?.value??"" : "", zone:row.original.zone??"", supplierId:row.original.supplier?.name ? (supplierOptions.find(s=>s.label===row.original.supplier?.name)?.id??"") : "", bankAccountNo:"", feeType:row.original.feeType, occurredDate:"", currency:row.original.currency, originalAmount:row.original.originalAmount, businessOrderNo:row.original.businessOrderNo??"", mawbNo:row.original.mawbNo??"", remark:"" });
+      return (
       <div className="flex gap-1">
-        <Button variant="ghost" size="sm" className="h-8" onClick={() => { setEditId(row.original.id); setF({ advanceNo:row.original.advanceNo, organizationId:row.original.organization?.name ? COMPANY_OPTIONS.find(c=>c.label===row.original.organization?.name)?.value??"" : "", zone:row.original.zone??"", supplierId:row.original.supplier?.name ? (supplierOptions.find(s=>s.label===row.original.supplier?.name)?.id??"") : "", bankAccountNo:"", feeType:row.original.feeType, occurredDate:"", currency:row.original.currency, originalAmount:row.original.originalAmount, businessOrderNo:row.original.businessOrderNo??"", mawbNo:row.original.mawbNo??"", remark:"" }); setOpen(true); }}><Pencil className="h-3.5 w-3.5" /></Button>
+        <Button variant="ghost" size="sm" className="h-8" onClick={() => { setEditId(row.original.id); load(); setViewMode(true); setOpen(true); }}>查看</Button>
+        <Button variant="ghost" size="sm" className="h-8" onClick={() => { setEditId(row.original.id); load(); setViewMode(false); setOpen(true); }}><Pencil className="h-3.5 w-3.5 mr-1" />编辑</Button>
         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(row.original.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
       </div>
-    ) },
+    ); } },
   ];
 
   return (
     <div>
-      <PageHeader title="预付款登记" description="C11 预付款登记" actionLabel="新增" onAction={() => { setEditId(null); setF(empty()); setOpen(true); }} />
-      <DataTable columns={cols} data={data?.items??[]} searchKey="advanceNo" searchPlaceholder="搜索预付款单号..." />
+      <PageHeader title="预付款登记" description="C11 预付款登记" actionLabel="新增" onAction={() => { setEditId(null); setViewMode(false); setF(empty()); setOpen(true); }} />
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <FilterPanel
+          fields={[
+            {key:"company",label:"预付款公司"},{key:"zone",label:"区域"},
+            {key:"fee",label:"费用项目"},{key:"status",label:"状态"},
+            {key:"keyword",label:"预付款单号"},{key:"supplier",label:"供应商"},
+            {key:"currency",label:"币种"},{key:"bizNo",label:"业务编号"},
+            {key:"mawb",label:"提单号"},
+          ]}
+          storageKey="advance-filter-order"
+          onOrderChange={setFilterOrder}
+        />
+        {filterOrder.includes("company") && <><span className="text-sm text-muted-foreground">预付款公司</span>
+        <SelectSearch value={orgF} onValueChange={v => setOrgF(v)} options={[{value:"",label:"全部"},...COMPANY_OPTIONS]} placeholder="全部" className="w-[240px]" /></>}
+        {filterOrder.includes("zone") && <><span className="text-sm text-muted-foreground">区域</span>
+        <SelectSearch value={zoneF} onValueChange={v => setZoneF(v)} options={[{value:"",label:"全部"},...ZONE_OPTIONS.map(z=>({value:z,label:z}))]} placeholder="全部" className="w-[120px]" /></>}
+        {filterOrder.includes("fee") && <><span className="text-sm text-muted-foreground">费用项目</span>
+        <SelectSearch value={feeF} onValueChange={v => setFeeF(v)} options={[{value:"",label:"全部"},...FEE_TYPE_OPTIONS.map(o=>({value:o,label:o}))]} placeholder="全部" className="w-[170px]" /></>}
+        {filterOrder.includes("status") && <><span className="text-sm text-muted-foreground">状态</span>
+        <SelectSearch value={statusF} onValueChange={v => setStatusF(v)} options={[{value:"",label:"全部"},...STATUS_TABS.filter(t=>t.key).map(t=>({value:t.key,label:t.label}))]} placeholder="全部" className="w-[110px]" /></>}
+        <span className="border-l border-border h-5 mx-1" />
+        <Button size="sm" className="h-8 text-xs" onClick={() => setApplied({ org:orgF, zone:zoneF, fee:feeF, status:statusF })}>查询</Button>
+        <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => { setOrgF(""); setZoneF(""); setFeeF(""); setStatusF(""); setApplied({ org:"", zone:"", fee:"", status:"" }); }}>重置</Button>
+      </div>
+      <DataTable columns={cols} data={(data?.items??[]).filter(i => {
+        if (applied.org && i.organization?.name !== COMPANY_OPTIONS.find(c=>c.value===applied.org)?.label) return false;
+        if (applied.zone && i.zone !== applied.zone) return false;
+        if (applied.fee && i.feeType !== applied.fee) return false;
+        if (applied.status && i.collectionStatus !== applied.status) return false;
+        return true;
+      })} searchKey="advanceNo" searchPlaceholder="搜索预付款单号..." selectable selectedIds={selected} onSelectionChange={setSelected} stickyRightColumns={["act"]} />
 
-      <FormDialog open={open} onOpenChange={setOpen} title={editId ? "编辑预付款" : "新增预付款"} width="2xl" loading={sm.isPending} onSubmit={() => sm.mutate()}>
+      <FormDialog open={open} onOpenChange={v => { setOpen(v); if (!v) setViewMode(false); }} title={viewMode ? "查看预付款" : editId ? "编辑预付款" : "新增预付款"} width="2xl" loading={!viewMode && sm.isPending} onSubmit={() => !viewMode && sm.mutate()}>
+        <fieldset disabled={viewMode} className="contents">
         <FormField label="预付款公司" required>
           <Select value={f.organizationId} onValueChange={v => setF({...f, organizationId:v})}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -138,6 +183,7 @@ export default function Page() {
         <FormField label="备注" fullWidth>
           <Input value={f.remark} onChange={e => setF({...f, remark:e.target.value})} />
         </FormField>
+        </fieldset>
       </FormDialog>
 
       <ConfirmDialog

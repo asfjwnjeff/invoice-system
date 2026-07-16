@@ -17,7 +17,7 @@ const navItems = [
   { href: "/applications", label: "开票申请", icon: FileSpreadsheet, section: "销项发票" },
   { href: "/pre-invoices", label: "预制发票", icon: FileEdit, section: "销项发票" },
   { href: "/invoices", label: "销项发票管理", icon: Files, section: "销项发票" },
-  { href: "/advance-payments", label: "代垫管理", icon: Receipt, section: "代垫关务" },
+  { href: "/advance-payments", label: "代垫管理", icon: Receipt, section: "预付款" },
   { href: "/red-flush", label: "红冲管理", icon: RotateCcw, section: "红冲作废" },
   { href: "/void-applications", label: "作废管理", icon: Ban, section: "红冲作废" },
   { href: "/input-invoices", label: "进项发票", icon: ArrowDownToLine, section: "进项归档" },
@@ -30,7 +30,6 @@ export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
-  // Find which section the current path belongs to, default that one open
   const defaultOpen = (() => {
     const currentItem = navItems.find(item => pathname === item.href || pathname.startsWith(item.href + "/"));
     return currentItem ? currentItem.section : "";
@@ -38,7 +37,6 @@ export function Sidebar() {
 
   const [openSections, setOpenSections] = useState<Set<string>>(() => new Set(sections));
 
-  // Auto-expand the section containing the active route
   useEffect(() => {
     if (defaultOpen) {
       setOpenSections(prev => { const next = new Set(prev); next.add(defaultOpen); return next; });
@@ -55,27 +53,39 @@ export function Sidebar() {
 
   return (
     <aside className={cn("flex flex-col border-r border-sidebar-border bg-sidebar h-screen sticky top-0 transition-all duration-200", collapsed ? "w-[60px]" : "w-[220px]")}>
-      <div className="flex h-14 items-center justify-between px-4 border-b border-sidebar-border">
-        {!collapsed && <span className="font-semibold text-sm tracking-tight text-sidebar-foreground">发票模块</span>}
-        <Button variant="ghost" size="icon" className={cn("h-7 w-7 text-sidebar-foreground hover:bg-sidebar-accent", collapsed && "mx-auto")} onClick={() => setCollapsed(!collapsed)}>
+      {/* Header — title never shrinks */}
+      <div className={cn("flex items-center justify-between px-4 border-b border-sidebar-border shrink-0", collapsed ? "h-14 flex-col justify-center gap-0.5" : "h-14")}>
+        {!collapsed ? (
+          <div className="flex flex-col min-w-0">
+            <span className="font-semibold text-sm tracking-tight text-sidebar-foreground truncate">发票模块</span>
+            <span className="text-[0.625rem] text-sidebar-foreground/35 leading-none mt-0.5">v2.0</span>
+          </div>
+        ) : (
+          <span className="text-[0.625rem] text-sidebar-foreground/35 leading-none">v2.0</span>
+        )}
+        <Button variant="ghost" size="icon" className={cn("h-7 w-7 text-sidebar-foreground hover:bg-sidebar-accent shrink-0", collapsed && "mt-0.5")} onClick={() => setCollapsed(!collapsed)}>
           <ChevronLeft className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")} />
         </Button>
       </div>
-      <nav className="flex-1 overflow-y-auto py-2 px-2">
-        {sections.map((section) => {
+
+      <nav className="flex-1 overflow-y-auto py-2 px-2 no-scrollbar">
+        {sections.map((section, sectionIdx) => {
           const sectionItems = navItems.filter((item) => item.section === section);
           const isOpen = openSections.has(section);
           const isActive = sectionItems.some(item => pathname === item.href || pathname.startsWith(item.href + "/"));
 
           return (
-            <div key={section} className="mb-1">
-              {/* Section header — clickable to collapse */}
+            <div key={section}>
+              {sectionIdx > 0 && (
+                <div className={cn("mx-3 my-2.5 h-px bg-sidebar-border", collapsed && "mx-2")} />
+              )}
+
               {!collapsed ? (
                 <button
                   onClick={() => toggleSection(section)}
                   className={cn(
                     "flex items-center justify-between w-full px-3 py-1.5 text-[0.6875rem] font-medium tracking-widest uppercase transition-colors rounded-sm",
-                    isActive ? "text-sidebar-foreground" : "text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
+                    isActive ? "text-sidebar-foreground" : "text-sidebar-foreground/40 hover:text-sidebar-foreground/60"
                   )}
                 >
                   <span>{section}</span>
@@ -87,7 +97,6 @@ export function Sidebar() {
                 </div>
               )}
 
-              {/* Section items */}
               {(!collapsed ? isOpen : true) && (
                 <div className={cn("space-y-0.5", !collapsed && "mt-0.5")}>
                   {sectionItems.map((item) => (

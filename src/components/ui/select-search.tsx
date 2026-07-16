@@ -62,7 +62,7 @@ export function SelectSearch({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
+        <div className="absolute z-50 mt-1 w-full min-w-[200px] rounded-md border bg-popover text-popover-foreground shadow-md">
           <div className="flex items-center border-b px-3 py-2">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Input
@@ -81,13 +81,14 @@ export function SelectSearch({
                 <button
                   key={opt.value}
                   type="button"
+                  title={opt.label}
                   onClick={() => handleSelect(opt.value)}
                   className={cn(
                     "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
                     value === opt.value && "bg-accent text-accent-foreground font-medium",
                   )}
                 >
-                  {opt.label}
+                  <span className="truncate">{opt.label}</span>
                 </button>
               ))
             )}

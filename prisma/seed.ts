@@ -18,6 +18,7 @@ async function main() {
   // ═══════════════════════════════════════════════════════
   const org = await db.organization.create({
     data: {
+      id: "org-default",
       name: "深圳半导体供应链有限公司",
       shortName: "深圳半导体",
       code: "SZ-SEMI-001",
@@ -444,66 +445,37 @@ async function main() {
   // ═══════════════════════════════════════════════════════
   // 11. ADVANCE PAYMENTS (5)
   // ═══════════════════════════════════════════════════════
+  // 10 records from CBMS C11 (2026-07-16)
   const advDefs = [
-    {
-      advanceNo: "ADV-2026-0001", customer: "华为", biz: "SO-2026-0001",
-      feeType: "CUSTOMS_DUTY", date: "2026-03-10",
-      curr: "CNY", origAmt: 80000, rate: 1, collected: 80000,
-      payerType: "COMPANY", invStrategy: "SEPARATE_INVOICE",
-      collStatus: "COLLECTED", woStatus: "WRITTEN_OFF",
-      remark: "华为Q1进口关税代垫",
-    },
-    {
-      advanceNo: "ADV-2026-0002", customer: "华为", biz: "SO-2026-0001",
-      feeType: "IMPORT_VAT", date: "2026-03-12",
-      curr: "CNY", origAmt: 120000, rate: 1, collected: 100000,
-      payerType: "COMPANY", invStrategy: "NET_AMOUNT",
-      collStatus: "PARTIALLY_COLLECTED", woStatus: "PARTIALLY_WRITTEN",
-      remark: "华为Q1进口增值税代垫",
-    },
-    {
-      advanceNo: "ADV-2026-0003", customer: "中芯国际", biz: "SO-2026-0002",
-      feeType: "CUSTOMS_DUTY", date: "2026-04-05",
-      curr: "CNY", origAmt: 250000, rate: 1, collected: 200000,
-      payerType: "COMPANY", invStrategy: "SEPARATE_INVOICE",
-      collStatus: "PARTIALLY_COLLECTED", woStatus: "PENDING",
-      remark: "中芯国际Q2设备关税",
-    },
-    {
-      advanceNo: "ADV-2026-0004", customer: "中芯国际", biz: "SO-2026-0002",
-      feeType: "PORT_FEE", date: "2026-04-08",
-      curr: "CNY", origAmt: 50000, rate: 1, collected: 50000,
-      payerType: "COMPANY", invStrategy: "MERGE_WITH_SERVICE",
-      collStatus: "COLLECTED", woStatus: "WRITTEN_OFF",
-      remark: "中芯国际港口杂费代垫",
-    },
-    {
-      advanceNo: "ADV-2026-0005", customer: "华虹半导体", biz: "SO-2026-0004",
-      feeType: "INSPECTION_FEE", date: "2026-04-15",
-      curr: "USD", origAmt: 5000, rate: 7.15, collected: 35750,
-      payerType: "THIRD_PARTY", invStrategy: "MANUAL",
-      collStatus: "COLLECTED", woStatus: "WRITTEN_OFF",
-      remark: "华虹光刻机商检费，第三方支付",
-    },
+    { advanceNo:"P-26070179", zone:"PAC", feeType:"仓储费", curr:"CNY", origAmt:188.89, bizNo:"PAC-ANJI26070001D", mawb:"873963208746", remark:"873963208746仓储费", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070178", zone:"ZHJ", feeType:"仓储费", curr:"CNY", origAmt:1347.30, bizNo:"ZHJ-CTPT26070011J", mawb:"KFB-00955753", remark:"ZHJ-CTPT26070011J", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070177", zone:"ZHJ", feeType:"换单费", curr:"CNY", origAmt:350.00, bizNo:"ZHJ-XSBDT26070018D", mawb:"", remark:"", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070176", zone:"ZHJ", feeType:"换单费", curr:"CNY", origAmt:3100.00, bizNo:"ZHJ-XSBDT26070018D", mawb:"", remark:"", collStatus:"WRITTEN_OFF" },
+    { advanceNo:"P-26070175", zone:"ZHJ", feeType:"换单费", curr:"CNY", origAmt:8160.00, bizNo:"ZHJ-XSBDT26070017D", mawb:"", remark:"", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070174", zone:"ZHJ", feeType:"换单费", curr:"CNY", origAmt:4405.00, bizNo:"ZHJ-XSBDT26070016D", mawb:"", remark:"", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070173", zone:"CAN", feeType:"换单费", curr:"CNY", origAmt:424.00, bizNo:"CAN-CANSEMI26070020Y", mawb:"20576555990_123018792092", remark:"", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070172", zone:"CAN", feeType:"换单费", curr:"CNY", origAmt:424.00, bizNo:"CAN-CANSEMI26070019Y", mawb:"20576555382_123018792081", remark:"", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070171", zone:"CAN", feeType:"换单费", curr:"CNY", origAmt:424.00, bizNo:"CAN-ZENSEMI26070018D", mawb:"20576478231_123019130391", remark:"", collStatus:"COLLECTED" },
+    { advanceNo:"P-26070170", zone:"CAN", feeType:"换单费", curr:"CNY", origAmt:424.00, bizNo:"CAN-ZENSEMI26070017D", mawb:"20576555846_123018792114", remark:"", collStatus:"COLLECTED" },
   ];
   const advancePayments: Record<string, string> = {};
   for (const adv of advDefs) {
     const r = await db.advancePayment.create({
       data: {
         advanceNo: adv.advanceNo,
-        customerId: customers[adv.customer]!,
-        businessOrderId: bizOrders[adv.biz]!.id,
         organizationId: "org-default",
-        zone: "PVG",
+        zone: adv.zone,
         feeType: adv.feeType,
-        occurredDate: d(adv.date),
+        occurredDate: new Date("2026-07-16"),
         currency: adv.curr,
         originalAmount: money(adv.origAmt),
+        businessOrderNo: adv.bizNo || null,
+        mawbNo: adv.mawb || null,
+        remark: adv.remark || null,
         collectionStatus: adv.collStatus,
-        writeOffStatus: adv.woStatus,
+        writeOffStatus: "PENDING",
         status: "CONFIRMED",
-        remark: adv.remark,
-        createdBy: users["customs_specialist"],
+        createdBy: null,
       },
     });
     advancePayments[adv.advanceNo] = r.id;
@@ -520,7 +492,7 @@ async function main() {
       importPort: "深圳海关", declUnit: "深圳半导体供应链有限公司", consUnit: "华为技术有限公司",
       taxpayer: "深圳半导体供应链有限公司", taxpayerNo: "91440300MA5ABCD123",
       taxAmt: 80000, payDate: "2026-03-15", curr: "CNY",
-      isAdvance: true, advNo: "ADV-2026-0001",
+      isAdvance: true, advNo: "P-26070179",
     },
     {
       bookNo: "CPB-2026-0002", bookType: "IMPORT_VAT_PAYMENT", taxType: "IMPORT_VAT",
@@ -528,7 +500,7 @@ async function main() {
       importPort: "深圳海关", declUnit: "深圳半导体供应链有限公司", consUnit: "华为技术有限公司",
       taxpayer: "深圳半导体供应链有限公司", taxpayerNo: "91440300MA5ABCD123",
       taxAmt: 120000, payDate: "2026-03-18", curr: "CNY",
-      isAdvance: true, advNo: "ADV-2026-0002",
+      isAdvance: true, advNo: "P-26070178",
     },
     {
       bookNo: "CPB-2026-0003", bookType: "CUSTOMS_DUTY_PAYMENT", taxType: "CUSTOMS_DUTY",
@@ -536,7 +508,7 @@ async function main() {
       importPort: "上海海关", declUnit: "深圳半导体供应链有限公司", consUnit: "中芯国际集成电路制造有限公司",
       taxpayer: "深圳半导体供应链有限公司", taxpayerNo: "91440300MA5ABCD123",
       taxAmt: 250000, payDate: "2026-04-10", curr: "CNY",
-      isAdvance: true, advNo: "ADV-2026-0003",
+      isAdvance: true, advNo: "P-26070177",
     },
   ];
   for (const cpb of cpbDefs) {
@@ -1056,7 +1028,7 @@ async function main() {
     data: {
       ruleCode: "RISK-002", ruleName: "代垫金额超限检查",
       riskLevel: "MEDIUM", entityType: "advance_payment",
-      entityId: advancePayments["ADV-2026-0003"] ?? "none",
+      entityId: advancePayments["P-26070177"] ?? "none",
       description: "中芯国际Q2单笔代垫超20万元，需业务经理确认",
       suggestion: "核实业务合同代垫上限条款",
       isResolved: false,

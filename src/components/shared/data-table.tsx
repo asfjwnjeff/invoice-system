@@ -130,9 +130,10 @@ export function DataTable<TData extends { id: string }, TValue>({ columns, data,
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 flex-1">
           {searchKey && <div className="relative max-w-xs flex-1"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder={searchPlaceholder} value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""} onChange={(e) => table.getColumn(searchKey)?.setFilterValue(e.target.value)} className="pl-9" /></div>}
-          {hideableCols.length > 0 && (
-            <div className="relative" ref={panelRef}>
-              <Button variant="outline" size="sm" onClick={() => setColPanelOpen(!colPanelOpen)} className="gap-1"><Columns className="h-3.5 w-3.5" />列设置</Button>
+        </div>
+        {hideableCols.length > 0 && (
+          <div className="relative" ref={panelRef}>
+            <Button variant="outline" size="sm" onClick={() => setColPanelOpen(!colPanelOpen)} className="gap-1"><Columns className="h-3.5 w-3.5" />列设置</Button>
               {colPanelOpen && (
                 <div className="absolute top-full mt-1 right-0 z-50 w-64 rounded-md border bg-popover shadow-md p-2">
                   {pinnedList.length > 0 && (
@@ -158,7 +159,6 @@ export function DataTable<TData extends { id: string }, TValue>({ columns, data,
               )}
             </div>
           )}
-        </div>
         {selectable && selectedIds.length > 0 && batchBar && <div className="flex items-center gap-2 rounded-md bg-blue-100 dark:bg-blue-900/40 px-3 py-1.5 text-sm border border-blue-300 dark:border-blue-800/50"><span className="text-blue-800 dark:text-blue-300 font-medium">已选 {selectedIds.length} 项</span>{batchBar}</div>}
       </div>
       {filterBar && <div className="flex items-center">{filterBar}</div>}
@@ -167,9 +167,9 @@ export function DataTable<TData extends { id: string }, TValue>({ columns, data,
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
               <TableRow key={hg.id} className="hover:bg-transparent">
-                {selectable && <TableHead className="w-10 h-10"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></TableHead>}
+                {selectable && <TableHead className="w-10 h-10 bg-muted"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></TableHead>}
                 {hg.headers.map((header) => (
-                  <TableHead key={header.id} className={`h-10 text-xs font-medium text-muted-foreground uppercase tracking-wider ${stickyRightColumns.includes(header.id) ? "sticky right-0 bg-card z-10 shadow-[-2px_0_4px_-2px_rgba(0,0,0,0.1)]" : ""}`}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
+                  <TableHead key={header.id} className={`h-10 text-xs font-semibold bg-muted text-foreground uppercase tracking-wider ${(header.column.columnDef.meta as Record<string,string>|undefined)?.headerClassName ?? ""} ${stickyRightColumns.includes(header.id) ? "sticky right-0 bg-muted z-10 shadow-[-4px_0_6px_-2px_rgba(0,0,0,0.08)]" : ""}`}>{header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}</TableHead>
                 ))}
               </TableRow>
             ))}
