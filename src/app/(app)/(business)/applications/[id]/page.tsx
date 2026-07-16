@@ -8,12 +8,24 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Pencil } from "lucide-react";
 
-const catLabels: Record<string, string> = { DIGITAL_SPECIAL: "数电专票", DIGITAL_NORMAL: "数电普票", VAT_SPECIAL: "增值税专票", VAT_NORMAL: "增值税普票", E_NORMAL: "电子普票" };
-const appStatusLabels: Record<string, string> = { DRAFT: "草稿", PENDING_APPROVAL: "待审批", APPROVED: "已审批", REJECTED: "已驳回", ISSUED: "已开票", CONVERTED: "已制单" };
-const currencyLabels: Record<string, string> = { CNY: "人民币", USD: "美元", HKD: "港币", EUR: "欧元" };
+const catLabels: Record<string, string> = {
+  DIGITAL_SPECIAL: "数电专票", DIGITAL_NORMAL: "数电普票",
+  VAT_SPECIAL: "增值税专票", VAT_NORMAL: "增值税普票", E_NORMAL: "电子普票",
+};
+const appStatusLabels: Record<string, string> = {
+  DRAFT: "草稿", PENDING_APPROVAL: "待审批", APPROVED: "已审批",
+  REJECTED: "已驳回", ISSUED: "已开票", CONVERTED: "已制单",
+};
+const currencyLabels: Record<string, string> = {
+  CNY: "人民币", USD: "美元", HKD: "港币", JPY: "日元",
+  EUR: "欧元", AUD: "澳大利亚元", GBP: "英镑",
+};
+const deliveryLabels: Record<string, string> = {
+  EMAIL: "邮件发送", DOWNLOAD: "自行下载", MANUAL: "线下交付",
+};
 
 interface ApplicationData {
-  id: string; applicationNo: string; invoiceCategory: string; currency: string; status: string;
+  id: string; applicationNo: string; invoiceCategory: string; currency: string; deliveryMethod: string; status: string;
   buyerName: string; buyerTaxNo: string; buyerAddress: string; buyerBankName: string; buyerBankAccount: string;
   sellerName: string; sellerTaxNo: string; sellerAddress: string; sellerBankName: string; sellerBankAccount: string;
   amountWithoutTax: number; taxAmount: number; amountWithTax: number;
@@ -21,11 +33,12 @@ interface ApplicationData {
   remark: string; sourceType: string;
   taxSubject?: { name: string; taxNo: string; address: string; phone: string } | null;
   revenueOrder?: { orderNo: string } | null;
-  items: { id: string; itemName: string; spec: string; unit: string; quantity: number; unitPrice: number; amount: number; taxRate: number; taxAmount: number; }[];
+  items: { id: string; itemName: string; taxClassificationCode: string; spec: string; unit: string; quantity: number; unitPrice: number; amount: number; taxRate: number; taxAmount: number; }[];
   createdAt: string; updatedAt: string;
 }
 
 const S = (v: unknown) => String(v ?? "");
+const N = (v: unknown) => Number(v ?? 0);
 
 const DetailField = ({ label, value }: { label: string; value: string }) => (
   <FormField label={label}><p className="text-sm">{value || "-"}</p></FormField>
@@ -44,7 +57,6 @@ export default function ApplicationDetailPage() {
   const sv = (s: string): "success" | "warning" | "danger" | "neutral" =>
     s === "ISSUED" || s === "APPROVED" ? "success" : s === "PENDING_APPROVAL" ? "warning" : s === "REJECTED" ? "danger" : "neutral";
 
-  const N = (v: unknown) => Number(v ?? 0);
   const items = (data.items as ApplicationData["items"]) ?? [];
 
   return (
@@ -69,7 +81,8 @@ export default function ApplicationDetailPage() {
           <DetailField label="申请号" value={S(data.applicationNo)} />
           <DetailField label="发票类型" value={catLabels[S(data.invoiceCategory)] ?? S(data.invoiceCategory)} />
           <DetailField label="记账币种" value={currencyLabels[S(data.currency)] ?? S(data.currency)} />
-          <DetailField label="状态" value={appStatusLabels[S(data.status)] ?? S(data.status)} />
+          <DetailField label="交付方式" value={deliveryLabels[S(data.deliveryMethod)] ?? S(data.deliveryMethod)} />
+          <DetailField label="发票状态" value={appStatusLabels[S(data.status)] ?? S(data.status)} />
         </CardContent>
       </Card>
 
@@ -78,7 +91,7 @@ export default function ApplicationDetailPage() {
           <CardHeader className="pb-3"><CardTitle className="text-base">购方信息</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-8 gap-y-4">
             <DetailField label="购方名称" value={S(data.buyerName)} />
-            <DetailField label="购方纳税人识别号" value={S(data.buyerTaxNo)} />
+            <DetailField label="纳税人识别号" value={S(data.buyerTaxNo)} />
             <div className="col-span-2"><DetailField label="购方地址电话" value={S(data.buyerAddress)} /></div>
             <div className="col-span-2"><DetailField label="购方银行账号" value={[S(data.buyerBankName), S(data.buyerBankAccount)].filter(Boolean).join(" / ")} /></div>
           </CardContent>
@@ -106,12 +119,13 @@ export default function ApplicationDetailPage() {
                   <tr className="border-b text-xs text-muted-foreground">
                     <th className="text-left py-2 px-2">#</th>
                     <th className="text-left py-2 px-2">项目名称</th>
+                    <th className="text-left py-2 px-2">编码</th>
                     <th className="text-left py-2 px-2">规格型号</th>
                     <th className="text-left py-2 px-2">单位</th>
                     <th className="text-right py-2 px-2">数量</th>
                     <th className="text-right py-2 px-2">含税单价</th>
-                    <th className="text-right py-2 px-2">未税金额</th>
                     <th className="text-right py-2 px-2">税率</th>
+                    <th className="text-right py-2 px-2">未税金额</th>
                     <th className="text-right py-2 px-2">税额</th>
                   </tr>
                 </thead>
@@ -120,12 +134,13 @@ export default function ApplicationDetailPage() {
                     <tr key={S(it.id) || i} className="border-b last:border-0">
                       <td className="py-2 px-2">{i + 1}</td>
                       <td className="py-2 px-2 font-medium">{S(it.itemName)}</td>
+                      <td className="py-2 px-2 text-xs text-muted-foreground">{S(it.taxClassificationCode) || "-"}</td>
                       <td className="py-2 px-2">{S(it.spec) || "-"}</td>
                       <td className="py-2 px-2">{S(it.unit) || "-"}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{N(it.quantity)}</td>
                       <td className="py-2 px-2 text-right tabular-nums">¥{N(it.unitPrice).toLocaleString()}</td>
-                      <td className="py-2 px-2 text-right tabular-nums">¥{N(it.amount).toLocaleString()}</td>
                       <td className="py-2 px-2 text-right tabular-nums">{N(it.taxRate)}%</td>
+                      <td className="py-2 px-2 text-right tabular-nums">¥{N(it.amount).toLocaleString()}</td>
                       <td className="py-2 px-2 text-right tabular-nums">¥{N(it.taxAmount).toLocaleString()}</td>
                     </tr>
                   ))}
@@ -148,7 +163,7 @@ export default function ApplicationDetailPage() {
           <CardHeader className="pb-3"><CardTitle className="text-base">销方信息</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 gap-x-8 gap-y-4">
             <DetailField label="销方名称" value={S(data.sellerName) || S(data.taxSubject?.name)} />
-            <DetailField label="销方纳税人识别号" value={S(data.sellerTaxNo) || S(data.taxSubject?.taxNo)} />
+            <DetailField label="纳税人识别号" value={S(data.sellerTaxNo) || S(data.taxSubject?.taxNo)} />
             <div className="col-span-2"><DetailField label="销方地址电话" value={S(data.sellerAddress) || S(data.taxSubject?.address)} /></div>
             <div className="col-span-2"><DetailField label="销方银行账号" value={[S(data.sellerBankName), S(data.sellerBankAccount)].filter(Boolean).join(" / ")} /></div>
           </CardContent>
@@ -164,10 +179,13 @@ export default function ApplicationDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {!!data.remark && (
+        {(!!data.remark || data.status) && (
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base">备注</CardTitle></CardHeader>
-            <CardContent><p className="text-sm">{S(data.remark)}</p></CardContent>
+            <CardHeader className="pb-3"><CardTitle className="text-base">备注与单据</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <DetailField label="开票申请号" value={S(data.applicationNo)} />
+              {!!data.remark && <DetailField label="备注" value={S(data.remark)} />}
+            </CardContent>
           </Card>
         )}
         <Card>
