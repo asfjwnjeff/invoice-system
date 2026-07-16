@@ -2,18 +2,20 @@ import { z } from "zod";
 
 export const advancePaymentSchema = z.object({
   advanceNo: z.string().min(1),
-  customerId: z.string().min(1),
-  businessOrderId: z.string().min(1),
-  customsDeclarationNo: z.string().optional(),
+  organizationId: z.string().min(1),
+  zone: z.string().optional(),
+  supplierId: z.string().optional(),
+  bankAccountNo: z.string().optional(),
   feeType: z.string().min(1),
   occurredDate: z.string().min(1),
   currency: z.string().default("CNY"),
   originalAmount: z.number().min(0),
-  exchangeRate: z.number().default(1),
-  baseCurrencyAmount: z.number().min(0),
-  payerType: z.string().default("COMPANY"),
-  invoiceStrategy: z.string().default("NO_INVOICE"),
+  businessOrderNo: z.string().optional(),
+  mawbNo: z.string().optional(),
   remark: z.string().optional(),
+  status: z.string().optional(),
+  collectionStatus: z.string().optional(),
+  writeOffStatus: z.string().optional(),
 });
 
 export type AdvancePaymentInput = z.infer<typeof advancePaymentSchema>;

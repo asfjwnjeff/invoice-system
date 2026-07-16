@@ -27,7 +27,8 @@ model Organization {
   customers    Customer[]
   suppliers    Supplier[]
   businessOrders BusinessOrder[]
-  costCenters  CostCenter[]
+  costCenters      CostCenter[]
+  advancePayments  AdvancePayment[]
 
   @@map("organizations")
 }
@@ -132,8 +133,9 @@ model Supplier {
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
-  inputInvoices InputInvoice[]
-  costEntries   CostEntry[]
+  inputInvoices    InputInvoice[]
+  costEntries      CostEntry[]
+  advancePayments  AdvancePayment[]
 
   @@map("suppliers")
 }
@@ -285,35 +287,32 @@ model FeeItem {
 model AdvancePayment {
   id                         String                   @id @default(cuid())
   advanceNo                  String                   @unique @map("advance_no")
-  customerId                 String                   @map("customer_id")
-  customer                   Customer                 @relation(fields: [customerId], references: [id])
-  businessOrderId            String                   @map("business_order_id")
-  businessOrder              BusinessOrder            @relation(fields: [businessOrderId], references: [id])
-  customsDeclarationId       String?                  @map("customs_declaration_id")
-  feeType                    String                  @map("fee_type")
+  organizationId             String                   @map("organization_id")
+  organization               Organization?            @relation(fields: [organizationId], references: [id])
+  zone                       String?                  @map("zone")
+  supplierId                 String?                  @map("supplier_id")
+  supplier                   Supplier?                @relation(fields: [supplierId], references: [id])
+  bankAccountNo              String?                  @map("bank_account_no")
+  feeType                    String                   @map("fee_type")
   occurredDate               DateTime                 @map("occurred_date")
-  currency                   String                 @default("CNY")
+  currency                   String                   @default("CNY")
   originalAmount             Decimal                  @default(0) @map("original_amount")
-  exchangeRate               Decimal?                 @default(1) @map("exchange_rate")
-  baseCurrencyAmount         Decimal                  @default(0) @map("base_currency_amount")
-  payerType                  String                @default("COMPANY") @map("payer_type")
-  invoiceStrategy            String          @default("NO_INVOICE") @map("invoice_strategy")
-  collectionStatus           String  @default("PENDING") @map("collection_status")
-  writeOffStatus             String           @default("PENDING") @map("write_off_status")
-  status                     String            @default("DRAFT")
-  isInvoiced                 Boolean                  @default(false) @map("is_invoiced")
-  isInSettlement             Boolean                  @default(false) @map("is_in_settlement")
-  relatedInvoiceId           String?                  @map("related_invoice_id")
-  relatedCustomsPaymentBookId String?                 @map("related_customs_payment_book_id")
-  collectedAmount            Decimal                  @default(0) @map("collected_amount")
+  businessOrderNo            String?                  @map("business_order_no")
+  mawbNo                     String?                  @map("mawb_no")
   remark                     String?
-  attachments                String                     @default("[]")
+  status                     String                   @default("DRAFT")
+  collectionStatus           String                   @default("PENDING") @map("collection_status")
+  writeOffStatus             String                   @default("PENDING") @map("write_off_status")
+  attachments                String                   @default("[]")
   createdBy                  String?                  @map("created_by")
   creator                    User?                    @relation("CreatedByAdvancePayments", fields: [createdBy], references: [id])
+  customerId                 String?                  @map("customer_id")
+  customer                   Customer?                @relation(fields: [customerId], references: [id])
+  businessOrderId            String?                  @map("business_order_id")
+  businessOrder              BusinessOrder?           @relation(fields: [businessOrderId], references: [id])
+  settlementItems            SettlementItem[]
   createdAt                  DateTime                 @default(now()) @map("created_at")
   updatedAt                  DateTime                 @updatedAt @map("updated_at")
-
-  settlementItems SettlementItem[]
 
   @@map("advance_payments")
 }
