@@ -234,12 +234,12 @@ export default function ApplicationNewPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="overflow-visible">
         <CardHeader className="pb-3 flex flex-row items-center justify-between">
           <CardTitle className="text-base">项目明细</CardTitle>
           <Button type="button" variant="outline" size="sm" onClick={addItem}><Plus className="h-3.5 w-3.5 mr-1" />添加行</Button>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 overflow-visible">
           <div className="grid grid-cols-12 gap-2 px-3 py-1 text-xs text-muted-foreground font-medium">
             <div className="col-span-3">项目名称</div>
             <div>规格型号</div>
