@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, ChevronLeft, ChevronDown, FileClock, Coins, Landmark, Calculator, FileSpreadsheet, Files, FileEdit, RotateCcw, ArrowDownToLine, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, ChevronLeft, ChevronDown, FileClock, Coins, Landmark, Calculator, FileSpreadsheet, Files, FileEdit, RotateCcw, ArrowDownToLine, ClipboardCheck, Receipt, Ban } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "工作台", icon: LayoutDashboard, section: "概览" },
@@ -17,7 +17,9 @@ const navItems = [
   { href: "/applications", label: "开票申请", icon: FileSpreadsheet, section: "销项发票" },
   { href: "/pre-invoices", label: "预制发票", icon: FileEdit, section: "销项发票" },
   { href: "/invoices", label: "销项发票管理", icon: Files, section: "销项发票" },
+  { href: "/advance-payments", label: "代垫管理", icon: Receipt, section: "代垫关务" },
   { href: "/red-flush", label: "红冲管理", icon: RotateCcw, section: "红冲作废" },
+  { href: "/void-applications", label: "作废管理", icon: Ban, section: "红冲作废" },
   { href: "/input-invoices", label: "进项发票", icon: ArrowDownToLine, section: "进项归档" },
   { href: "/cost-entry", label: "成本录入", icon: Calculator, section: "进项归档" },
 ];
